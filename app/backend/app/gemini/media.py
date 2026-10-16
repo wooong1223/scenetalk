@@ -42,11 +42,14 @@ _PANO_SUFFIX = (
     "eye-level camera, cinematic K-drama lighting, ultra detailed. No people, no text, no watermark."
 )
 _PORTRAIT_SUFFIX = (
-    " Photorealistic half-body portrait, standing and facing the camera, neutral calm expression, "
-    "soft cinematic key light. Plain solid bright green background (#00FF00) filling the entire frame "
-    "behind the person, no shadows on the background, no props, no text. "
-    "This is an original fictional character, not a real celebrity."
+    " Photorealistic FULL-BODY shot: the whole person visible from the top of the head to the shoes, "
+    "standing upright and facing the camera, feet planted on a plain green floor, arms relaxed, "
+    "neutral calm expression, soft cinematic key light, eye-level camera. The person is centered and "
+    "fills about 85% of the frame height with a little space above the head and below the feet. "
+    "Plain solid bright green background (#00FF00) filling the entire frame and floor, no shadows, "
+    "no props, no text. This is an original fictional character, not a real celebrity."
 )
+PORTRAIT_ASPECT = "9:16"
 
 
 def _now_iso() -> str:
@@ -87,6 +90,7 @@ def _generate_image_sync(
     aspect_ratio: str,
     ref_image: bytes | None = None,
     ref_mime: str = "image/jpeg",
+    image_size: str | None = None,
 ) -> tuple[bytes, str] | None:
     client = get_genai_client()
     contents: list = [prompt]
@@ -99,7 +103,10 @@ def _generate_image_sync(
             contents=contents,
             config=types.GenerateContentConfig(
                 response_modalities=["IMAGE"],
-                image_config=types.ImageConfig(aspect_ratio=aspect_ratio),
+                image_config=types.ImageConfig(
+                    aspect_ratio=aspect_ratio,
+                    **({"image_size": image_size} if image_size else {}),
+                ),
             ),
         )
     except Exception as e:
@@ -151,8 +158,11 @@ async def generate_scene_media(session_id: str) -> None:
     url_base = f"/assets/generated/{session_id}"
 
     try:
-        pano_task = asyncio.to_thread(_generate_image_sync, _panorama_prompt(rec), "21:9")
-        char_task = asyncio.to_thread(_generate_image_sync, _portrait_prompt(rec), "3:4")
+        # 2K panorama so the sphere texture stays sharp next to the portrait
+        pano_task = asyncio.to_thread(
+            _generate_image_sync, _panorama_prompt(rec), "21:9", None, "image/jpeg", "2K"
+        )
+        char_task = asyncio.to_thread(_generate_image_sync, _portrait_prompt(rec), PORTRAIT_ASPECT)
         pano_res, char_res = await asyncio.gather(pano_task, char_task)
 
         if pano_res:
@@ -178,12 +188,12 @@ async def generate_scene_media(session_id: str) -> None:
 
         async def _variant(emotion: str) -> None:
             prompt = (
-                "Edit this photo: keep the exact same person, same clothing, same framing, "
-                "same solid bright green background. Change only the facial expression to "
+                "Edit this photo: keep the exact same person, same clothing, same full-body framing, "
+                "same pose and same solid bright green background. Change only the facial expression to "
                 f"{EMOTION_VARIANTS[emotion]}."
             )
             res = await asyncio.to_thread(
-                _generate_image_sync, prompt, "3:4", neutral_bytes, neutral_mime
+                _generate_image_sync, prompt, PORTRAIT_ASPECT, neutral_bytes, neutral_mime
             )
             if res:
                 data, mime = res

@@ -11,7 +11,7 @@ from ..models.domain import (
 )
 from .client import get_genai_client
 from .fallbacks import fallback_nuance
-from .verifier import verified_call
+from .verifier import verified_call, verified_call_with_trace
 
 logger = logging.getLogger("scenetalk.subtitle_explainer")
 _CACHE: dict[tuple[str, str], ExpressionNuance] = {}
@@ -36,17 +36,19 @@ async def explain_expression(req: ExplainRequest) -> ExpressionNuance:
         "2 natural Korean example sentences (`examples_ko`), and a 1-sentence roleplay "
         "speaking tip (`practice_tip_ko`)."
     )
-    res = await verified_call(
+    res, trace = await verified_call_with_trace(
         client=get_genai_client(),
         model=s.GEMINI_PLANNER_MODEL,
         prompt=prompt,
         schema=ExpressionNuance,
-        thinking_level="minimal",
-        timeout_sec=10.0,
+        thinking_level="low",
+        timeout_sec=45.0,
         fallback_factory=lambda: fallback_nuance(expr_clean),
         max_retries=1,
+        stage="subtitle_explainer",
     )
-    _CACHE[key] = res
+    if not trace.fallback_used:
+        _CACHE[key] = res  # never cache a fallback, so the next click retries Argon
     return res
 
 
@@ -65,9 +67,12 @@ async def extract_youtube_subtitles(video_id: str) -> SubtitleTrack | None:
     yt_url = f"https://www.youtube.com/watch?v={video_id}"
     prompt = (
         f"Watch this YouTube video ({yt_url}) and extract 6 to 12 key Korean dialogue lines "
-        "with accurate `start_sec`, `end_sec`, `text_ko`, `text_en`, and 2–3 notable Korean "
-        "expressions/idioms in `tokens` for each line. Set `video_id` to "
-        f"'{video_id}' and `title` to the Korean title or scene summary."
+        "with accurate `start_sec`, `end_sec`, `text_ko`, `text_en`. For each line fill `tokens` with "
+        "1–3 expressions from that line that are WORTH LEARNING for an intermediate Korean learner: "
+        "idioms, collocations, multi-word phrases, grammar patterns/sentence endings, speech-level or "
+        "attitude markers (e.g. '그깟 ~ 때문에', '눈치를 보다', '-(으)란 소리예요?', '당장 접어'). "
+        "Do NOT list plain single nouns, names, or basic verbs on their own (not '죽음', '생각하다'). "
+        f"Set `video_id` to '{video_id}' and `title` to the Korean title or scene summary."
     )
     track = await verified_call(
         client=get_genai_client(),

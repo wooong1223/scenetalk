@@ -10,6 +10,7 @@ import {
   SubtitleLine,
 } from "../api/client";
 import { useAppNavigate } from "../router";
+import { LanguageSelector, loadUiLanguage } from "./LanguageSelector";
 
 const DEMO_URL = "https://www.youtube.com/watch?v=V1b8VxrkbZU";
 const DEMO_ID = "V1b8VxrkbZU";
@@ -46,17 +47,17 @@ export function LauncherPage() {
   const [activeSub, setActiveSub] = useState<SubtitleLine | null>(null);
   const [explainData, setExplainData] = useState<ExpressionNuance | null>(null);
   const [explaining, setExplaining] = useState(false);
+  const [explainingExpr, setExplainingExpr] = useState<string>("");
+  const [linesOpen, setLinesOpen] = useState(false);
 
   const [saved, setSaved] = useState<string[]>(() => loadSavedExpressions(initial.v));
   const [customExpr, setCustomExpr] = useState("");
 
-  const [timestampSec, setTimestampSec] = useState<number>(29);
   const [entering, setEntering] = useState(false);
   const [enterError, setEnterError] = useState<string | null>(null);
 
   const roleplayRef = useRef<HTMLDivElement | null>(null);
 
-  // load subtitles when videoId changes
   useEffect(() => {
     let cancelled = false;
     setLoadingSubs(true);
@@ -69,8 +70,6 @@ export function LauncherPage() {
         if (cancelled) return;
         setSubtitles(res.lines);
         setTrackTitle(res.title);
-        const mid = res.lines[Math.floor(res.lines.length / 2)];
-        if (mid) setTimestampSec(mid.start_sec);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -86,7 +85,7 @@ export function LauncherPage() {
 
   useEffect(() => {
     if (initial.tab === "roleplay" && roleplayRef.current) {
-      roleplayRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      roleplayRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [initial.tab, subtitles.length]);
 
@@ -99,7 +98,7 @@ export function LauncherPage() {
     e.preventDefault();
     const id = parseYoutubeId(urlInput);
     if (!id) {
-      setUrlError("YouTube 링크나 11자리 영상 ID를 입력해 주세요.");
+      setUrlError("Paste a YouTube link or an 11-character video ID.");
       return;
     }
     setUrlError(null);
@@ -123,10 +122,12 @@ export function LauncherPage() {
   const handleExplainLine = async (line: SubtitleLine, token?: string) => {
     setActiveSub(line);
     seekYoutubeTo(line.start_sec);
+    const targetExpr =
+      token || (line.tokens && line.tokens.length > 0 ? line.tokens[0] : line.text_ko);
+    setExplainingExpr(targetExpr);
+    setExplainData(null); // clear the previous card so the loading state is visible
     setExplaining(true);
     try {
-      const targetExpr =
-        token || (line.tokens && line.tokens.length > 0 ? line.tokens[0] : line.text_ko);
       const res = await explainSubtitle({
         video_id: videoId,
         timestamp_sec: line.start_sec,
@@ -154,17 +155,36 @@ export function LauncherPage() {
     setCustomExpr("");
   };
 
-  const mission = saved.length > 0 ? saved : DEFAULT_MISSION;
+  // Starter mission when nothing is saved: suggest from this clip's own subtitle tokens.
+  const suggestedMission = (() => {
+    if (videoId === DEMO_ID) return DEFAULT_MISSION;
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const ln of subtitles) {
+      for (const tok of ln.tokens || []) {
+        const t = tok.trim();
+        if (t.length < 2 || seen.has(t)) continue;
+        seen.add(t);
+        out.push(t);
+        if (out.length >= 4) return out;
+      }
+    }
+    if (out.length > 0) return out;
+    return subtitles.slice(0, 2).map((ln) => ln.text_ko).filter(Boolean);
+  })();
+  const mission = saved.length > 0 ? saved : suggestedMission;
 
   const handleEnterScene = async () => {
     if (entering) return;
     setEntering(true);
     setEnterError(null);
+    const mid = subtitles[Math.floor(subtitles.length / 2)];
     try {
       const res = await createSession({
         video_id: videoId,
-        timestamp_sec: timestampSec,
-        saved_expressions: mission,
+        timestamp_sec: mid ? mid.start_sec : 0,
+        saved_expressions: mission.slice(0, 6),
+        ui_language: loadUiLanguage(),
       });
       navigate(`/scene/${res.session_id}`);
     } catch (err) {
@@ -173,75 +193,77 @@ export function LauncherPage() {
     }
   };
 
+  const lineCount = subtitles.length;
+
   return (
     <div className="st-page">
       <div className="st-wrap">
-        {/* Header */}
-        <header
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            justifyContent: "space-between",
-            padding: "28px 0 18px",
-            borderBottom: "1px solid var(--line)",
-            gap: 16,
-            flexWrap: "wrap",
-          }}
-        >
-          <div className="st-serif" style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.02em" }}>
+        <header className="st-header">
+          <a className="st-logo" href="/">
+            <span className="st-logo-mark">S</span>
             SceneTalk
-          </div>
-          <div style={{ color: "var(--smoke)", fontSize: 14 }}>
-            Watch it. Enter it. Live the story.
-          </div>
+          </a>
+          <LanguageSelector />
         </header>
 
-        {/* URL input */}
+        {/* Hero */}
+        <section style={{ padding: "34px 0 10px", maxWidth: 760 }}>
+          <h1 style={{ fontSize: 40, fontWeight: 800, color: "var(--ink)" }}>
+            Learn Korean from the K-drama you're watching.
+          </h1>
+          <p style={{ fontSize: 17, color: "var(--body)", margin: "14px 0 0", maxWidth: 620 }}>
+            Paste a clip. SceneTalk turns its real lines into a lesson, then lets you step into the
+            scene and talk with its character.
+          </p>
+        </section>
+
         <form
           onSubmit={handleLoadUrl}
+          className="st-card"
           style={{
             display: "flex",
-            gap: 10,
-            margin: "26px 0 8px",
-            flexWrap: "wrap",
+            gap: 8,
+            padding: 8,
+            margin: "22px 0 8px",
+            alignItems: "center",
+            borderRadius: 18,
           }}
         >
-          <div style={{ flex: "1 1 420px" }}>
-            <input
-              className="st-input"
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="YouTube 링크를 붙여넣으세요"
-              aria-label="YouTube 링크"
-            />
-          </div>
-          <button className="st-btn st-btn--yellow" type="submit" style={{ padding: "12px 22px" }}>
-            불러오기
+          <input
+            className="st-input"
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=…"
+            aria-label="YouTube link"
+            style={{ border: 0, boxShadow: "none", fontSize: 16, padding: "12px 12px" }}
+          />
+          <button className="st-btn st-btn--violet" type="submit" style={{ padding: "13px 22px", flexShrink: 0 }}>
+            Load clip
           </button>
         </form>
-        <div style={{ minHeight: 20, fontSize: 13, color: urlError ? "var(--bad)" : "var(--smoke-2)" }}>
-          {urlError ?? "K-드라마 클립을 넣으면 자막에서 표현을 뽑아 레슨과 롤플레잉 장면을 만듭니다."}
+        <div style={{ minHeight: 22, fontSize: 13, color: urlError ? "var(--coral)" : "var(--muted)", paddingLeft: 4 }}>
+          {urlError ?? "Works best with short clips that have Korean dialogue — teasers, previews, key scenes."}
         </div>
 
         {/* Video + summary */}
         <section
+          className="st-two-col"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 7fr) minmax(0, 5fr)",
             gap: 24,
-            margin: "22px 0 34px",
+            margin: "22px 0 28px",
             alignItems: "start",
           }}
-          className="st-video-row"
         >
           <div
             style={{
               position: "relative",
               paddingTop: "56.25%",
               background: "#000",
-              borderRadius: 12,
+              borderRadius: 18,
               overflow: "hidden",
-              border: "1px solid var(--line)",
+              boxShadow: "var(--shadow)",
             }}
           >
             <iframe
@@ -253,26 +275,32 @@ export function LauncherPage() {
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
             />
           </div>
-          <div style={{ paddingTop: 4 }}>
-            <div className="st-serif" style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.35 }}>
-              {loadingSubs ? "자막을 읽는 중…" : trackTitle || "제목 없는 영상"}
-            </div>
-            <div style={{ marginTop: 10, color: "var(--smoke)", fontSize: 14, lineHeight: 1.7 }}>
+          <div style={{ paddingTop: 2 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.35, fontFamily: "Pretendard, var(--sans)" }}>
+              {loadingSubs ? "Reading the clip…" : trackTitle || "Untitled clip"}
+            </h2>
+            <p style={{ marginTop: 8, color: "var(--body)", fontSize: 14, lineHeight: 1.6 }}>
               {subsError
-                ? "자막을 가져오지 못했습니다. 다른 영상으로 시도해 보세요."
+                ? "We couldn't read this clip's lines. Try another video."
                 : loadingSubs
-                ? "자막이 없으면 Gemini 4 Argon이 영상에서 직접 대사를 추출합니다. 조금 걸릴 수 있어요."
-                : `자막 ${subtitles.length}줄 · 저장한 표현 ${saved.length}개`}
-            </div>
-            <div style={{ marginTop: 18, display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {(saved.length ? saved : []).map((e) => (
-                <span key={e} className="st-chip st-chip--yellow">
-                  {e}
-                </span>
+                ? "No subtitles on file, so Gemini is watching the video and transcribing its Korean lines. This can take up to a minute."
+                : `${lineCount} lines · ${saved.length} saved expression${saved.length === 1 ? "" : "s"}`}
+            </p>
+            <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {saved.map((e) => (
+                <button
+                  key={e}
+                  className="st-chip st-chip--green"
+                  onClick={() => toggleSaved(e)}
+                  title="Remove from mission"
+                  style={{ cursor: "pointer", fontFamily: "Pretendard, var(--sans)" }}
+                >
+                  {e} <span style={{ opacity: 0.55 }}>×</span>
+                </button>
               ))}
               {saved.length === 0 && !loadingSubs && (
-                <span style={{ color: "var(--smoke-2)", fontSize: 13 }}>
-                  아직 저장한 표현이 없어요. 아래 레슨에서 배우거나 자막을 눌러 저장하세요.
+                <span style={{ color: "var(--muted)", fontSize: 13 }}>
+                  Expressions you learn or save will show up here and become your roleplay mission.
                 </span>
               )}
             </div>
@@ -281,262 +309,249 @@ export function LauncherPage() {
 
         {/* Two modes */}
         <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-            gap: 24,
-          }}
+          className="st-two-col"
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}
         >
-          {/* ① Study */}
-          <div
-            style={{
-              background: "var(--panel)",
-              border: "1px solid var(--line)",
-              borderTop: "4px solid var(--sub-yellow)",
-              borderRadius: 14,
-              padding: 22,
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-            }}
-          >
-            <div>
-              <div className="st-serif" style={{ fontSize: 24, fontWeight: 900 }}>
-                ① 표현 학습
-              </div>
-              <div style={{ color: "var(--smoke)", fontSize: 14, marginTop: 6, lineHeight: 1.6 }}>
-                이 장면의 대사에서 핵심 표현을 배우고, 뜻 고르기·빈칸·짝 맞추기로 바로 확인합니다.
-              </div>
-            </div>
-
+          {/* Lesson */}
+          <div className="st-card st-card--pad" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <ModeHeader
+              tint="var(--green-tint)"
+              color="var(--green)"
+              glyph="가"
+              step="Step 1"
+              title="Expression lesson"
+              desc="Learn the key expressions from this clip, then check yourself with meaning, fill-in-the-blank and matching questions."
+            />
             <button
-              className="st-btn st-btn--yellow"
+              className="st-btn st-btn--green st-btn--lg"
               onClick={() => navigate(`/learn/${videoId}`)}
               disabled={loadingSubs || !!subsError}
-              style={{ fontSize: 17, padding: "14px 20px" }}
             >
-              레슨 시작
+              Start lesson
             </button>
 
-            <div style={{ fontSize: 13, color: "var(--smoke)" }}>
-              자막을 눌러 한 줄씩 해설을 보고 저장할 수도 있어요.
-            </div>
-            <div
-              className="st-scroll"
-              style={{
-                maxHeight: 220,
-                overflowY: "auto",
-                border: "1px solid var(--line)",
-                borderRadius: 10,
-                background: "var(--ink)",
-              }}
+            <button
+              className="st-btn st-btn--ghost"
+              onClick={() => setLinesOpen((v) => !v)}
+              style={{ justifyContent: "space-between", padding: "8px 10px", fontSize: 14 }}
             >
-              {subtitles.map((line) => {
-                const active = activeSub?.index === line.index;
-                return (
-                  <button
-                    key={line.index}
-                    onClick={() => handleExplainLine(line)}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "48px 1fr",
-                      gap: 10,
-                      width: "100%",
-                      textAlign: "left",
-                      background: active ? "rgba(242, 201, 76, 0.1)" : "transparent",
-                      border: 0,
-                      borderBottom: "1px solid var(--line)",
-                      color: active ? "var(--sub-yellow)" : "var(--paper)",
-                      padding: "10px 12px",
-                      cursor: "pointer",
-                      fontSize: 14,
-                    }}
-                  >
-                    <span style={{ color: "var(--smoke-2)", fontVariantNumeric: "tabular-nums" }}>
-                      {fmtTime(line.start_sec)}
-                    </span>
-                    <span>
-                      <span style={{ fontWeight: 600 }}>{line.text_ko}</span>
-                      <span style={{ display: "block", color: "var(--smoke)", fontSize: 12, marginTop: 2 }}>
-                        {line.text_en}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+              <span>Browse the clip's lines {lineCount ? `(${lineCount})` : ""}</span>
+              <span aria-hidden>{linesOpen ? "▴" : "▾"}</span>
+            </button>
 
-            {(explaining || explainData) && (
-              <div
-                style={{
-                  border: "1px solid rgba(242, 201, 76, 0.4)",
-                  borderRadius: 10,
-                  padding: 14,
-                  background: "rgba(242, 201, 76, 0.06)",
-                }}
-              >
-                {explaining && !explainData ? (
-                  <div className="st-pulse" style={{ color: "var(--smoke)", fontSize: 13 }}>
-                    Gemini 4 Argon이 뉘앙스를 설명하는 중…
-                  </div>
-                ) : explainData ? (
-                  <>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
-                      <div className="st-serif" style={{ fontSize: 18, fontWeight: 700 }}>
-                        {explainData.expression}
-                      </div>
-                      <span className="st-chip" style={{ fontSize: 11 }}>
-                        {explainData.formality}
-                      </span>
-                    </div>
-                    <div style={{ marginTop: 6, fontSize: 14 }}>{explainData.meaning_en}</div>
-                    <div style={{ marginTop: 2, fontSize: 13, color: "var(--smoke)" }}>
-                      {explainData.meaning_ko}
-                    </div>
-                    <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.6 }}>{explainData.nuance_note}</div>
-                    {explainData.examples_ko?.length > 0 && (
-                      <ul style={{ margin: "8px 0 0", paddingLeft: 18, fontSize: 13, color: "var(--smoke)" }}>
-                        {explainData.examples_ko.slice(0, 2).map((ex, i) => (
-                          <li key={i}>{ex}</li>
-                        ))}
-                      </ul>
-                    )}
-                    <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {linesOpen && (
+              <>
+                <div
+                  className="st-scroll"
+                  style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--line)", borderRadius: 12 }}
+                >
+                  {subtitles.map((line) => {
+                    const active = activeSub?.index === line.index;
+                    return (
                       <button
-                        className={`st-btn ${saved.includes(explainData.expression) ? "" : "st-btn--yellow"}`}
-                        onClick={() => toggleSaved(explainData.expression)}
-                        style={{ padding: "8px 14px", fontSize: 13 }}
+                        key={line.index}
+                        onClick={() => handleExplainLine(line)}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "44px 1fr",
+                          gap: 10,
+                          width: "100%",
+                          textAlign: "left",
+                          background: active ? "var(--green-tint)" : "transparent",
+                          border: 0,
+                          borderBottom: "1px solid var(--line)",
+                          color: "var(--ink)",
+                          padding: "10px 12px",
+                          cursor: "pointer",
+                          fontSize: 14,
+                        }}
                       >
-                        {saved.includes(explainData.expression) ? "저장됨 · 해제" : "이 표현 저장"}
+                        <span style={{ color: "var(--muted)", fontVariantNumeric: "tabular-nums", fontSize: 12, paddingTop: 2 }}>
+                          {fmtTime(line.start_sec)}
+                        </span>
+                        <span>
+                          <span style={{ fontWeight: 600, fontFamily: "Pretendard, var(--sans)" }}>{line.text_ko}</span>
+                          <span style={{ display: "block", color: "var(--body)", fontSize: 12, marginTop: 2 }}>
+                            {line.text_en}
+                          </span>
+                        </span>
                       </button>
-                      {activeSub?.tokens?.slice(0, 4).map((tk) => (
-                        <button
-                          key={tk}
-                          className="st-btn st-btn--ghost"
-                          onClick={() => activeSub && handleExplainLine(activeSub, tk)}
-                          style={{ padding: "8px 12px", fontSize: 13 }}
-                        >
-                          {tk}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                ) : null}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
 
-            <form onSubmit={handleAddCustom} style={{ display: "flex", gap: 8 }}>
-              <input
-                className="st-input"
-                value={customExpr}
-                onChange={(e) => setCustomExpr(e.target.value)}
-                placeholder="직접 표현 추가"
-                style={{ padding: "10px 12px", fontSize: 14 }}
-              />
-              <button className="st-btn" type="submit" style={{ padding: "10px 14px", fontSize: 13 }}>
-                추가
-              </button>
-            </form>
-            {saved.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {saved.map((e) => (
-                  <button
-                    key={e}
-                    className="st-chip st-chip--yellow"
-                    onClick={() => toggleSaved(e)}
-                    title="누르면 저장 해제"
-                    style={{ cursor: "pointer" }}
-                  >
-                    {e} <span style={{ opacity: 0.6 }}>×</span>
+                {(explaining || explainData) && (
+                  <div style={{ border: "1px solid #bfe8d2", borderRadius: 12, padding: 14, background: "var(--green-tint)" }}>
+                    {explaining && !explainData ? (
+                      <div aria-live="polite">
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                          <div style={{ fontSize: 22, fontWeight: 800 }}>{explainingExpr}</div>
+                          <span className="st-chip st-pulse" style={{ fontSize: 11 }}>● Analysing…</span>
+                        </div>
+                        <div className="st-pulse" style={{ marginTop: 8, fontSize: 13, color: "var(--body)" }}>
+                          Gemini is working out the meaning, nuance and politeness level. Usually 5–15 seconds.
+                        </div>
+                        <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+                          {[92, 76, 60].map((w) => (
+                            <div key={w} className="st-shimmer" style={{ height: 12, width: `${w}%`, borderRadius: 6 }} />
+                          ))}
+                        </div>
+                      </div>
+                    ) : explainData ? (
+                      <>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
+                          <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "Pretendard, var(--sans)" }}>
+                            {explainData.expression}
+                          </div>
+                          <span className="st-chip" style={{ fontSize: 11 }}>{explainData.formality}</span>
+                        </div>
+                        <div style={{ marginTop: 6, fontSize: 15, fontWeight: 500 }}>{explainData.meaning_en}</div>
+                        <div style={{ marginTop: 2, fontSize: 13, color: "var(--body)" }}>{explainData.meaning_ko}</div>
+                        <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.6, color: "var(--body)" }}>{explainData.nuance_note}</div>
+                        {explainData.examples_ko?.length > 0 && (
+                          <ul style={{ margin: "8px 0 0", paddingLeft: 18, fontSize: 13, color: "var(--body)" }}>
+                            {explainData.examples_ko.slice(0, 2).map((ex, i) => (
+                              <li key={i}>{ex}</li>
+                            ))}
+                          </ul>
+                        )}
+                        <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          <button
+                            className={`st-btn ${saved.includes(explainData.expression) ? "" : "st-btn--green"}`}
+                            onClick={() => toggleSaved(explainData.expression)}
+                            style={{ padding: "8px 14px", fontSize: 13 }}
+                          >
+                            {saved.includes(explainData.expression) ? "Saved · remove" : "Save expression"}
+                          </button>
+                          {activeSub?.tokens?.slice(0, 4).map((tk) => (
+                            <button
+                              key={tk}
+                              className="st-btn st-btn--ghost"
+                              onClick={() => activeSub && handleExplainLine(activeSub, tk)}
+                              style={{ padding: "8px 12px", fontSize: 13 }}
+                            >
+                              {tk}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                )}
+
+                <form onSubmit={handleAddCustom} style={{ display: "flex", gap: 8 }}>
+                  <input
+                    className="st-input"
+                    value={customExpr}
+                    onChange={(e) => setCustomExpr(e.target.value)}
+                    placeholder="Add your own expression"
+                    style={{ padding: "10px 12px", fontSize: 14 }}
+                  />
+                  <button className="st-btn" type="submit" style={{ padding: "10px 14px", fontSize: 13 }}>
+                    Add
                   </button>
-                ))}
-              </div>
+                </form>
+              </>
             )}
           </div>
 
-          {/* ② Roleplay */}
-          <div
-            ref={roleplayRef}
-            style={{
-              background: "var(--panel)",
-              border: "1px solid var(--line)",
-              borderTop: "4px solid var(--velvet)",
-              borderRadius: 14,
-              padding: 22,
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-            }}
-          >
-            <div>
-              <div className="st-serif" style={{ fontSize: 24, fontWeight: 900 }}>
-                ② 롤플레잉 대화
-              </div>
-              <div style={{ color: "var(--smoke)", fontSize: 14, marginTop: 6, lineHeight: 1.6 }}>
-                장면 속으로 들어가 상대 인물과 음성으로 대화합니다. 미션 표현을 자연스럽게 써 보세요.
-              </div>
-            </div>
+          {/* Roleplay */}
+          <div ref={roleplayRef} className="st-card st-card--pad" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <ModeHeader
+              tint="var(--violet-tint)"
+              color="var(--violet)"
+              glyph="▶"
+              step="Step 2"
+              title="Enter this scene"
+              desc="Step into the situation of this clip and talk with its counterpart character — out loud, in Korean, in a photoreal 360° set."
+            />
 
             <div>
-              <div style={{ fontSize: 13, color: "var(--smoke)", marginBottom: 8 }}>
-                미션 표현 {saved.length === 0 && "(기본값)"}
+              <div style={{ fontSize: 14, color: "var(--ink)", marginBottom: 4, fontWeight: 700 }}>
+                Your mission {saved.length === 0 && <span style={{ color: "var(--muted)", fontWeight: 500 }}>(suggested from this clip)</span>}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--body)", marginBottom: 10, lineHeight: 1.45 }}>
+                Work these expressions into the conversation naturally. The character reacts in real time, and your
+                end-of-scene report shows which ones you used and how natural they sounded.
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {mission.map((e) => (
-                  <span key={e} className="st-chip" style={{ borderColor: "rgba(216, 67, 75, 0.5)" }}>
+                  <span key={e} className="st-chip st-chip--violet" style={{ fontFamily: "Pretendard, var(--sans)" }}>
                     {e}
                   </span>
                 ))}
               </div>
             </div>
 
-            <div>
-              <div style={{ fontSize: 13, color: "var(--smoke)", marginBottom: 8 }}>
-                들어갈 장면 시점 · {fmtTime(timestampSec)}
-              </div>
-              <select
-                className="st-input"
-                value={timestampSec}
-                onChange={(e) => setTimestampSec(Number(e.target.value))}
-                style={{ padding: "10px 12px", fontSize: 14 }}
-              >
-                {subtitles.map((l) => (
-                  <option key={l.index} value={l.start_sec}>
-                    {fmtTime(l.start_sec)} — {l.text_ko}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             <button
-              className="st-btn st-btn--velvet"
+              className="st-btn st-btn--violet st-btn--lg"
               onClick={handleEnterScene}
               disabled={entering || loadingSubs}
-              style={{ fontSize: 17, padding: "14px 20px" }}
             >
-              {entering ? "장면을 짓는 중…" : "장면에 들어가기"}
+              {entering ? "Building your scene…" : "Enter the scene"}
             </button>
             {entering && (
               <div>
-                <div className="st-shimmer" style={{ height: 4, borderRadius: 4 }} />
-                <div style={{ marginTop: 8, fontSize: 13, color: "var(--smoke)", lineHeight: 1.6 }}>
-                  Gemini 4 Argon이 영상 맥락을 읽고 상대 인물과 공간을 설계합니다. 그 다음 Nano Banana가 실사 장면을 그립니다. 데모 영상은 20–40초, 새 영상은 영상을 직접 보느라 1분 안팎 걸려요.
+                <div className="st-shimmer" style={{ height: 6, borderRadius: 6 }} />
+                <div style={{ marginTop: 8, fontSize: 13, color: "var(--body)", lineHeight: 1.6 }}>
+                  Gemini reads the clip and designs your counterpart and the room, then paints the set.
+                  About 30 seconds for the demo clip, up to a minute for a new one.
                 </div>
               </div>
             )}
-            {enterError && <div style={{ color: "var(--bad)", fontSize: 13 }}>{enterError}</div>}
+            {enterError && <div style={{ color: "var(--coral)", fontSize: 13 }}>{enterError}</div>}
 
-            <div style={{ fontSize: 13, color: "var(--smoke-2)", lineHeight: 1.6 }}>
-              대화가 끝나면 Gemini 4 Argon이 발화를 평가해 학습 리포트를 만듭니다.
+            <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6 }}>
+              When you finish, you get a report on how naturally you used your mission expressions.
             </div>
           </div>
         </section>
       </div>
-      <style>{`
-        @media (max-width: 860px) {
-          .st-video-row { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
+    </div>
+  );
+}
+
+function ModeHeader({
+  tint,
+  color,
+  glyph,
+  step,
+  title,
+  desc,
+}: {
+  tint: string;
+  color: string;
+  glyph: string;
+  step: string;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+      <div
+        aria-hidden
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 14,
+          background: tint,
+          color,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 20,
+          fontWeight: 800,
+          flexShrink: 0,
+          fontFamily: "Pretendard, var(--sans)",
+        }}
+      >
+        {glyph}
+      </div>
+      <div>
+        <div style={{ fontSize: 12, fontWeight: 600, color }}>{step}</div>
+        <h2 style={{ fontSize: 22, fontWeight: 700, marginTop: 2 }}>{title}</h2>
+        <p style={{ color: "var(--body)", fontSize: 14, margin: "6px 0 0", lineHeight: 1.55 }}>{desc}</p>
+      </div>
     </div>
   );
 }

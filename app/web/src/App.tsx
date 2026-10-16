@@ -17,27 +17,26 @@ function SceneLoadingOverlay({ label, sub }: { label: string; sub?: string }) {
         inset: 0,
         zIndex: 5,
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 18,
-        background:
-          "radial-gradient(ellipse at 50% 60%, #2a211a 0%, #120f0d 55%, #0c0a09 100%)",
-        color: "var(--paper)",
+        background: "rgba(12, 10, 9, 0.55)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
         pointerEvents: "none",
+        fontFamily: "var(--sans)",
       }}
     >
-      <div
-        className="st-serif"
-        style={{ fontSize: 30, fontWeight: 700, letterSpacing: "-0.01em" }}
-      >
-        {label}
+      <div className="st-hud-card" style={{ width: 380, padding: "26px 28px", textAlign: "center" }}>
+        <div className="st-eyebrow" style={{ marginBottom: 8 }}>SceneTalk · Roleplay</div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)", letterSpacing: "-0.01em" }}>{label}</div>
+        {sub && (
+          <div style={{ color: "var(--body)", fontSize: 14, marginTop: 8, lineHeight: 1.5 }}>{sub}</div>
+        )}
+        <div
+          className="st-shimmer"
+          style={{ width: "100%", height: 6, borderRadius: 6, marginTop: 18, background: "#ececf1" }}
+        />
       </div>
-      {sub && <div style={{ color: "var(--smoke)", fontSize: 14 }}>{sub}</div>}
-      <div
-        className="st-shimmer"
-        style={{ width: 260, height: 4, borderRadius: 4, marginTop: 6 }}
-      />
     </div>
   );
 }
@@ -100,6 +99,17 @@ function ScenePage({ sessionId }: { sessionId: string }) {
     };
   }, [sessionId, loading, error, mediaStatus, setMedia]);
 
+  // Only open the voice session once the scene is actually on screen, so the
+  // character's first line lands on a painted set instead of a black screen.
+  const panoReady = useSceneStore((s) => s.panoReady);
+  const sceneReady = mediaStatus === "failed" || panoReady;
+  const [voiceOn, setVoiceOn] = useState(false);
+  useEffect(() => {
+    if (!sceneReady) return;
+    const t = window.setTimeout(() => setVoiceOn(true), 600); // a beat after the set appears
+    return () => window.clearTimeout(t);
+  }, [sceneReady]);
+
   const {
     startTalking,
     stopTalking,
@@ -107,10 +117,10 @@ function ScenePage({ sessionId }: { sessionId: string }) {
     sendGaze,
     sendObjectSelected,
     sendTriggerEvent,
-  } = useLiveVoice(loading || error ? null : sessionId);
+  } = useLiveVoice(loading || error || !voiceOn ? null : sessionId);
 
   if (loading) {
-    return <SceneLoadingOverlay label="장면을 여는 중" sub="세션을 불러오고 있어요" />;
+    return <SceneLoadingOverlay label="Opening the scene" sub="Loading your session" />;
   }
 
   if (error) {
@@ -124,7 +134,7 @@ function ScenePage({ sessionId }: { sessionId: string }) {
           color: "var(--bad)",
         }}
       >
-        세션을 불러올 수 없습니다: {error}
+        Couldn't load this session: {error}
       </div>
     );
   }
@@ -148,11 +158,11 @@ function ScenePage({ sessionId }: { sessionId: string }) {
       />
       {waitingForPano && (
         <SceneLoadingOverlay
-          label="Nano Banana가 장면을 그리는 중"
+          label="Painting the scene"
           sub={
             character
-              ? `${character.display_name_ko}이(가) 먼저 말을 걸어올 거예요. 음성은 이미 연결 중입니다.`
-              : "음성은 이미 연결 중입니다."
+              ? `${character.display_name_ko} will greet you as soon as the set is ready.`
+              : "The character will greet you as soon as the set is ready."
           }
         />
       )}

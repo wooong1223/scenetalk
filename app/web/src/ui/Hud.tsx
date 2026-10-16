@@ -14,31 +14,15 @@ interface HudProps {
   onSelectObject: (propId: string) => void;
 }
 
-const THINKING_BADGE_COLORS: Record<
-  string,
-  { bg: string; border: string; text: string }
-> = {
-  minimal: {
-    bg: "rgba(16, 185, 129, 0.18)",
-    border: "#10b981",
-    text: "#6ee7b7",
-  },
-  low: {
-    bg: "rgba(59, 130, 246, 0.18)",
-    border: "#3b82f6",
-    text: "#93c5fd",
-  },
-  medium: {
-    bg: "rgba(168, 85, 247, 0.18)",
-    border: "#a855f7",
-    text: "#d8b4fe",
-  },
-  high: {
-    bg: "rgba(245, 158, 11, 0.2)",
-    border: "#f59e0b",
-    text: "#fde68a",
-  },
+const THINKING_BADGE: Record<string, { bg: string; text: string }> = {
+  minimal: { bg: "var(--green-tint)", text: "#11643c" },
+  low: { bg: "#e8f0fe", text: "#1d4ed8" },
+  medium: { bg: "var(--violet-tint)", text: "#352a9e" },
+  high: { bg: "#fff4d6", text: "#8a5a00" },
 };
+
+const MISSION_HINT =
+  "Work these into the conversation naturally — the character reacts in real time and your report shows which ones you used.";
 
 export function Hud({
   sessionId,
@@ -73,23 +57,20 @@ export function Hud({
 
   const [textInput, setTextInput] = useState("");
   const [completing, setCompleting] = useState(false);
-  const [showTracePanel, setShowTracePanel] = useState(true);
+  const [showTracePanel, setShowTracePanel] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   const savedExpressions = story?.saved_expressions ?? [];
   const usedSet = new Set(story?.used_expressions ?? []);
   const activeProp: PropSpec | null = inspectedProp ?? hoveredProp;
 
   const latestCharacterLine =
-    transcripts
-      .filter((t) => t.speaker === "character")
-      .slice(-1)[0]?.text_ko ||
+    transcripts.filter((t) => t.speaker === "character").slice(-1)[0]?.text_ko ||
     character?.opening_line_ko ||
-    "대화를 시작해 보세요.";
+    "Start the conversation.";
 
   const latestUserLine =
-    transcripts
-      .filter((t) => t.speaker === "user")
-      .slice(-1)[0]?.text_ko || "";
+    transcripts.filter((t) => t.speaker === "user").slice(-1)[0]?.text_ko || "";
 
   const handleRequestHint = async () => {
     if (loadingHints) return;
@@ -123,392 +104,170 @@ export function Hud({
     setTextInput("");
   };
 
+  const phase = (story?.phase ?? "opening").replace("_", " ");
+
   return (
     <div
       style={{
         position: "absolute",
         inset: 0,
         pointerEvents: "none",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        padding: "18px 22px",
         fontFamily: "var(--sans)",
-        color: "#f8fafc",
+        color: "var(--ink)",
         zIndex: 10,
       }}
     >
-      {/* TOP BAR: Story Goal, Phase, & Action Buttons */}
+      {/* ---------- TOP: status/goal card (left) + action pill group (right) ---------- */}
       <div
         style={{
+          position: "absolute",
+          top: 16,
+          left: 20,
+          right: 20,
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           alignItems: "flex-start",
-          gap: "16px",
-          pointerEvents: "auto",
-          flexWrap: "wrap",
+          gap: 16,
+          pointerEvents: "none",
         }}
       >
-        {/* Left: Character & Story Goal */}
-        <div
-          style={{
-            background: "rgba(15, 23, 42, 0.84)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(148, 163, 184, 0.25)",
-            borderRadius: "16px",
-            padding: "12px 18px",
-            maxWidth: "520px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.45)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "6px",
-              flexWrap: "wrap",
-            }}
-          >
-            <span
-              style={{
-                background: wsConnected
-                  ? "rgba(16, 185, 129, 0.2)"
-                  : "rgba(245, 158, 11, 0.2)",
-                border: `1px solid ${wsConnected ? "#10b981" : "#f59e0b"}`,
-                color: wsConnected ? "#6ee7b7" : "#fcd34d",
-                fontSize: "11px",
-                fontWeight: 700,
-                padding: "2px 8px",
-                borderRadius: "999px",
-              }}
-            >
-              {wsConnected
-                ? "● Gemini 3.8 Live 연결됨"
-                : "◌ Live 연결 중..."}
-            </span>
-            <span
-              style={{
-                background: "rgba(99, 102, 241, 0.22)",
-                border: "1px solid #6366f1",
-                color: "#c7d2fe",
-                fontSize: "11px",
-                fontWeight: 700,
-                padding: "2px 8px",
-                borderRadius: "999px",
-              }}
-            >
-              PHASE: {(story?.phase ?? "opening").toUpperCase()} · TURN{" "}
-              {story?.turn_count ?? 0}
-            </span>
-            {world && (
-              <span style={{ fontSize: "12px", color: "#94a3b8" }}>
-                {world.setting_title_ko}
-              </span>
-            )}
-          </div>
-
-          <div
-            style={{
-              fontSize: "15px",
-              fontWeight: 700,
-              color: "#f8fafc",
-              marginBottom: "4px",
-            }}
-          >
-            🎯 목표:{" "}
-            {story?.user_Goal_ko ??
-              "상대방과 자연스럽게 대화를 이어가며 미션 표현을 사용해 보세요."}
-          </div>
-          {character && (
-            <div style={{ fontSize: "12px", color: "#cbd5e1" }}>
-              상대역 <strong>{character.display_name_ko}</strong> (
-              {character.role_in_scene_ko}) — {character.persona_summary_ko}
-            </div>
-          )}
-        </div>
-
-        {/* Right: Director Actions & Complete Scene */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            flexWrap: "wrap",
-          }}
-        >
-          <button
-            onClick={() => navigate("/")}
-            style={{
-              background: "rgba(30, 41, 59, 0.85)",
-              border: "1px solid rgba(148, 163, 184, 0.3)",
-              color: "#cbd5e1",
-              borderRadius: "12px",
-              padding: "9px 13px",
-              fontSize: "12px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            ← 홈
+        <div className="st-pillgroup" style={{ pointerEvents: "auto" }}>
+          <button className="st-pill" onClick={() => navigate("/")}>
+            ← Home
           </button>
-
-          <button
-            onClick={onTogglePointerLock}
-            style={{
-              background: pointerLockEnabled
-                ? "rgba(59, 130, 246, 0.28)"
-                : "rgba(30, 41, 59, 0.85)",
-              border: `1px solid ${
-                pointerLockEnabled ? "#60a5fa" : "rgba(148, 163, 184, 0.3)"
-              }`,
-              color: "#e2e8f0",
-              borderRadius: "12px",
-              padding: "9px 12px",
-              fontSize: "12px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            {pointerLockEnabled ? "🖱️ 시선 고정 ON" : "🖱️ 드래그로 둘러보기"}
+          <button className={`st-pill ${pointerLockEnabled ? "st-pill--on" : ""}`} onClick={onTogglePointerLock}>
+            {pointerLockEnabled ? "Look lock on" : "Drag to look"}
           </button>
-
-          <button
-            onClick={handleRequestHint}
-            disabled={loadingHints}
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35))",
-              border: "1px solid #10b981",
-              color: "#a7f3d0",
-              borderRadius: "12px",
-              padding: "9px 14px",
-              fontSize: "12px",
-              fontWeight: 700,
-              cursor: "pointer",
-              boxShadow: "0 4px 14px rgba(16, 185, 129, 0.25)",
-            }}
-          >
-            {loadingHints
-              ? "⚡ Argon Minimal 생성 중..."
-              : "💡 대사 힌트 (Argon minimal)"}
+          <button className="st-pill" onClick={handleRequestHint} disabled={loadingHints}>
+            {loadingHints ? "Thinking…" : "Line hint"}
           </button>
-
-          <button
-            onClick={() => onTriggerEvent(null)}
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(126, 34, 206, 0.35))",
-              border: "1px solid #a855f7",
-              color: "#e9d5ff",
-              borderRadius: "12px",
-              padding: "9px 14px",
-              fontSize: "12px",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            ⚡ 스토리 반전 (Argon Director)
+          <button className="st-pill" onClick={() => onTriggerEvent(null)}>
+            Plot twist
           </button>
-
-          <button
-            onClick={() => setShowTracePanel((v) => !v)}
-            style={{
-              background: "rgba(30, 41, 59, 0.85)",
-              border: "1px solid rgba(148, 163, 184, 0.35)",
-              color: "#e2e8f0",
-              borderRadius: "12px",
-              padding: "9px 12px",
-              fontSize: "12px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            🧠 Argon Trace ({argonTraces.length})
-          </button>
-
-          <button
-            onClick={handleCompleteScene}
-            disabled={completing}
-            style={{
-              background: "linear-gradient(135deg, #f59e0b, #ea580c)",
-              border: "none",
-              color: "#ffffff",
-              borderRadius: "12px",
-              padding: "10px 16px",
-              fontSize: "13px",
-              fontWeight: 800,
-              cursor: "pointer",
-              boxShadow: "0 6px 20px rgba(234, 88, 12, 0.45)",
-            }}
-          >
-            {completing
-              ? "🧠 Argon High 분석 중..."
-              : "🏁 씬 종료 & 학습 리포트"}
+          <button className="st-pill st-pill--violet" onClick={handleCompleteScene} disabled={completing}>
+            {completing ? "Grading…" : "End scene & get report"}
           </button>
         </div>
       </div>
 
-      {/* MIDDLE AREA: Left Mission Panel + Center Reticle + Right Argon Trace Panel */}
+      {/* ---------- LEFT: mission + clues + hints ---------- */}
       <div
         style={{
+          position: "absolute",
+          left: 20,
+          top: 20,
+          width: 340,
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flex: 1,
-          margin: "14px 0",
-          position: "relative",
+          flexDirection: "column",
+          gap: 10,
+          pointerEvents: "auto",
+          maxHeight: "calc(100vh - 150px)",
+          overflowY: "auto",
+          scrollbarWidth: "none",
         }}
       >
-        {/* Left: Saved Expressions Checklist & Prop Inspector */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            width: "320px",
-            pointerEvents: "auto",
-          }}
-        >
-          {/* Saved Expressions Mission Box */}
-          <div
-            style={{
-              background: "rgba(15, 23, 42, 0.82)",
-              backdropFilter: "blur(10px)",
-              border: "1px solid rgba(148, 163, 184, 0.25)",
-              borderRadius: "14px",
-              padding: "12px 14px",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "12px",
-                fontWeight: 700,
-                color: "#94a3b8",
-                marginBottom: "8px",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <span>
-                📌 미션 표현 ({usedSet.size}/{savedExpressions.length})
-              </span>
-              <span style={{ color: "#38bdf8" }}>클릭하여 발화</span>
+        <div className="st-hud-card" style={{ padding: "12px 16px", flexShrink: 0 }}>
+          {world && (
+            <div className="st-eyebrow" style={{ marginBottom: 4 }}>
+              {world.setting_title_ko}
             </div>
-
-            {savedExpressions.length === 0 ? (
-              <div style={{ fontSize: "12px", color: "#64748b" }}>
-                저장된 미션 표현이 없습니다. 자유롭게 대화해 보세요!
-              </div>
-            ) : (
-              <div
+          )}
+          <div style={{ fontSize: 13.5, fontWeight: 600, lineHeight: 1.45 }}>
+            {story?.user_Goal_ko ?? "Keep the conversation going and work in your mission expressions."}
+          </div>
+          {character && (
+            <div style={{ marginTop: 8 }}>
+              <button
+                type="button"
+                onClick={() => setShowAbout((v) => !v)}
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
+                  background: "transparent",
+                  border: "none",
+                  padding: 0,
+                  color: "var(--violet)",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
                 }}
               >
-                {savedExpressions.map((expr) => {
-                  const used = usedSet.has(expr);
-                  return (
-                    <div
-                      key={expr}
-                      onClick={() =>
-                        onSendTextTurn(
-                          `${expr}. 지금 이 상황에서 꼭 하고 싶은 말이에요.`
-                        )
-                      }
-                      title="클릭하면 이 표현을 포함한 대사를 즉시 발화합니다"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "7px 10px",
-                        borderRadius: "10px",
-                        background: used
-                          ? "rgba(16, 185, 129, 0.18)"
-                          : "rgba(30, 41, 59, 0.75)",
-                        border: `1px solid ${
-                          used ? "#10b981" : "rgba(148, 163, 184, 0.2)"
-                        }`,
-                        cursor: "pointer",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          color: used ? "#6ee7b7" : "#f1f5f9",
-                        }}
-                      >
-                        {used ? "✅ " : "⬜ "}
-                        {expr}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          color: used ? "#34d399" : "#94a3b8",
-                        }}
-                      >
-                        {used ? "달성!" : "발화 →"}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* 3D Prop Quick Selector & Inspector */}
-          <div
-            style={{
-              background: "rgba(15, 23, 42, 0.82)",
-              backdropFilter: "blur(10px)",
-              border: "1px solid rgba(148, 163, 184, 0.25)",
-              borderRadius: "14px",
-              padding: "12px 14px",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "12px",
-                fontWeight: 700,
-                color: "#94a3b8",
-                marginBottom: "8px",
-              }}
-            >
-              🔍 장면 속 단서 (0.6초 응시 또는 클릭)
+                {showAbout ? "Hide" : "About"} {character.display_name_ko} {showAbout ? "▴" : "▾"}
+              </button>
+              {showAbout && (
+                <div className="st-hud-sub" style={{ marginTop: 6 }}>
+                  <strong style={{ color: "var(--ink)" }}>{character.role_in_scene_ko}</strong> —{" "}
+                  {character.persona_summary_ko}
+                </div>
+              )}
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+          )}
+        </div>
+
+        <div className="st-hud-card" style={{ padding: "12px 14px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <span className="st-hud-title">
+              Mission expressions{" "}
+              <span style={{ color: "var(--body)", fontWeight: 500 }}>
+                {usedSet.size}/{savedExpressions.length}
+              </span>
+            </span>
+            <span style={{ fontSize: 11, color: "var(--violet)", fontWeight: 600 }}>Tap to say</span>
+          </div>
+          <div className="st-hud-sub" style={{ margin: "4px 0 8px" }}>{MISSION_HINT}</div>
+
+          {savedExpressions.length === 0 ? (
+            <div className="st-hud-sub">No mission expressions saved. Talk freely!</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {savedExpressions.map((expr) => {
+                const used = usedSet.has(expr);
+                return (
+                  <div
+                    key={expr}
+                    className={`st-mission-row ${used ? "st-mission-row--done" : ""}`}
+                    onClick={() => onSendTextTurn(`${expr}. 지금 이 상황에서 꼭 하고 싶은 말이에요.`)}
+                    title="Say a line that uses this expression"
+                  >
+                    <span style={{ fontFamily: "Pretendard, var(--sans)" }}>
+                      <span style={{ marginRight: 6 }}>{used ? "✓" : "○"}</span>
+                      {expr}
+                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: used ? "#11643c" : "var(--muted)" }}>
+                      {used ? "Done" : "Say"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Clues as a compact chip row */}
+          <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
+            <div className="st-hud-title" style={{ marginBottom: 6 }}>
+              Clues in the scene{" "}
+              <span style={{ color: "var(--muted)", fontWeight: 500 }}>gaze or click</span>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {world?.props.map((prop) => {
                 const isSelected = inspectedProp?.id === prop.id;
                 const isGazed = hoveredProp?.id === prop.id;
                 return (
                   <button
                     key={prop.id}
+                    type="button"
+                    className="st-chip"
                     onClick={() => {
                       setInspectedProp(prop);
                       onSelectObject(prop.id);
                     }}
                     style={{
-                      background: isSelected
-                        ? "rgba(251, 191, 36, 0.22)"
-                        : isGazed
-                        ? "rgba(56, 189, 248, 0.22)"
-                        : "rgba(30, 41, 59, 0.8)",
-                      border: `1px solid ${
-                        isSelected
-                          ? "#fbbf24"
-                          : isGazed
-                          ? "#38bdf8"
-                          : "rgba(148, 163, 184, 0.25)"
-                      }`,
-                      color: isSelected ? "#fde68a" : "#e2e8f0",
-                      borderRadius: "8px",
-                      padding: "5px 9px",
-                      fontSize: "12px",
-                      fontWeight: 600,
                       cursor: "pointer",
+                      padding: "4px 10px",
+                      fontSize: 12,
+                      fontFamily: "Pretendard, var(--sans)",
+                      background: isSelected ? "#fff4d6" : isGazed ? "var(--violet-tint)" : "#f2f2f4",
+                      borderColor: isSelected ? "#f3dfae" : isGazed ? "#d3ccff" : "var(--line)",
+                      color: isSelected ? "#8a5a00" : isGazed ? "#352a9e" : "var(--ink)",
                     }}
                   >
                     {prop.label_ko}
@@ -516,450 +275,267 @@ export function Hud({
                 );
               })}
             </div>
-
             {activeProp && (
               <div
+                className="st-hud-sub"
                 style={{
-                  marginTop: "10px",
-                  padding: "8px 10px",
-                  borderRadius: "8px",
-                  background: "rgba(30, 41, 59, 0.9)",
-                  borderLeft: "3px solid #fbbf24",
-                  fontSize: "12px",
-                  color: "#fde68a",
+                  marginTop: 8,
+                  padding: "7px 10px",
+                  borderRadius: 10,
+                  background: "#fff4d6",
+                  color: "#6b4600",
+                  fontFamily: "Pretendard, var(--sans)",
                 }}
               >
-                <strong>{activeProp.label_ko}:</strong> {activeProp.clue_text_ko}
+                <strong>{activeProp.label_ko}</strong> · {activeProp.clue_text_ko}
               </div>
             )}
           </div>
-
-          {/* Instant Hint Card (Argon thinking_level="minimal") */}
-          {hints.length > 0 && (
-            <div
-              style={{
-                background:
-                  "linear-gradient(145deg, rgba(6, 78, 59, 0.92), rgba(15, 23, 42, 0.95))",
-                border: "1px solid #10b981",
-                borderRadius: "14px",
-                padding: "12px 14px",
-                boxShadow: "0 10px 25px rgba(16, 185, 129, 0.25)",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "6px",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: 800,
-                    color: "#6ee7b7",
-                  }}
-                >
-                  ⚡ GEMINI-4-ARGON (MINIMAL) 추천 대사
-                </span>
-                <button
-                  onClick={() => setHints([], "")}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "#94a3b8",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-              {coachTipKo && (
-                <div
-                  style={{
-                    fontSize: "11px",
-                    color: "#a7f3d0",
-                    marginBottom: "8px",
-                  }}
-                >
-                  💡 {coachTipKo}
-                </div>
-              )}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                }}
-              >
-                {hints.slice(0, 2).map((h, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      background: "rgba(15, 23, 42, 0.7)",
-                      borderRadius: "10px",
-                      padding: "8px 10px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 700,
-                        color: "#ecfdf5",
-                        marginBottom: "3px",
-                      }}
-                    >
-                      “{h.line_ko}”
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        color: "#cbd5e1",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      {h.nuance_tip_ko}
-                    </div>
-                    <button
-                      onClick={() => {
-                        onSendTextTurn(h.line_ko);
-                        setHints([], "");
-                      }}
-                      style={{
-                        width: "100%",
-                        background: "#10b981",
-                        border: "none",
-                        borderRadius: "6px",
-                        padding: "5px 8px",
-                        color: "#022c22",
-                        fontWeight: 800,
-                        fontSize: "11px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      🎤 이 대사로 바로 말하기
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Center Reticle (First-Person Gaze Pointer) */}
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
-            pointerEvents: "none",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          <div
-            style={{
-              width: hoveredProp ? "14px" : "8px",
-              height: hoveredProp ? "14px" : "8px",
-              borderRadius: "50%",
-              border: `2px solid ${
-                hoveredProp ? "#fbbf24" : "rgba(255,255,255,0.55)"
-              }`,
-              background: hoveredProp
-                ? "rgba(251, 191, 36, 0.35)"
-                : "transparent",
-              transition: "all 0.15s ease",
-            }}
-          />
-          {hoveredProp && (
-            <span
-              style={{
-                background: "rgba(15, 23, 42, 0.8)",
-                color: "#fde68a",
-                fontSize: "11px",
-                padding: "2px 8px",
-                borderRadius: "999px",
-                border: "1px solid #fbbf24",
-              }}
-            >
-              👁️ {hoveredProp.label_ko} 응시 중
-            </span>
-          )}
-        </div>
-
-        {/* Right: Gemini 4 Argon 4-Tier Adaptive Thinking & Stateful Chain Panel */}
-        {showTracePanel && (
-          <div
-            style={{
-              width: "340px",
-              background: "rgba(15, 23, 42, 0.84)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(168, 85, 247, 0.35)",
-              borderRadius: "14px",
-              padding: "12px 14px",
-              pointerEvents: "auto",
-              maxHeight: "380px",
-              overflowY: "auto",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "12px",
-                fontWeight: 800,
-                color: "#d8b4fe",
-                marginBottom: "4px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <span>🧠 GEMINI-4-ARGON ENGINE TRACE</span>
-              <span style={{ fontSize: "10px", color: "#94a3b8" }}>
-                Interactions API
+        {hints.length > 0 && (
+          <div className="st-hud-card" style={{ padding: "12px 14px", borderColor: "#bfe8d2" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <span className="st-hud-title" style={{ color: "#11643c" }}>
+                Suggested lines
               </span>
-            </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#94a3b8",
-                marginBottom: "10px",
-              }}
-            >
-              4-Tier Adaptive Thinking (minimal/low/medium/high) + Stateful Chain
-            </div>
-
-            {directorNoteKo && (
-              <div
-                style={{
-                  background: "rgba(168, 85, 247, 0.16)",
-                  borderLeft: "3px solid #a855f7",
-                  padding: "7px 9px",
-                  borderRadius: "6px",
-                  fontSize: "11px",
-                  color: "#f3e8ff",
-                  marginBottom: "10px",
-                }}
+              <button
+                type="button"
+                onClick={() => setHints([], "")}
+                style={{ background: "transparent", border: "none", color: "var(--muted)", cursor: "pointer", fontSize: 14 }}
+                aria-label="Dismiss"
               >
-                <strong>🎬 Argon StoryDirector 연출:</strong> {directorNoteKo}
+                ✕
+              </button>
+            </div>
+            {coachTipKo && (
+              <div className="st-hud-sub" style={{ marginBottom: 8, fontFamily: "Pretendard, var(--sans)" }}>
+                {coachTipKo}
               </div>
             )}
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "7px",
-              }}
-            >
-              {argonTraces
-                .slice()
-                .reverse()
-                .map((tr, idx) => {
-                  const style =
-                    THINKING_BADGE_COLORS[tr.thinking_level] ??
-                    THINKING_BADGE_COLORS.low;
-                  return (
-                    <div
-                      key={`${tr.interaction_id}-${idx}`}
-                      style={{
-                        background: "rgba(30, 41, 59, 0.8)",
-                        border: "1px solid rgba(148, 163, 184, 0.2)",
-                        borderRadius: "9px",
-                        padding: "7px 9px",
-                        fontSize: "11px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          marginBottom: "3px",
-                        }}
-                      >
-                        <strong style={{ color: "#f8fafc" }}>{tr.stage}</strong>
-                        <span
-                          style={{
-                            background: style.bg,
-                            border: `1px solid ${style.border}`,
-                            color: style.text,
-                            padding: "1px 6px",
-                            borderRadius: "999px",
-                            fontSize: "10px",
-                            fontWeight: 700,
-                          }}
-                        >
-                          thinking: {tr.thinking_level}
-                        </span>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          color: "#94a3b8",
-                          fontSize: "10px",
-                        }}
-                      >
-                        <span>⏱ {tr.latency_ms}ms</span>
-                        <span>
-                          {tr.repair_attempts > 0
-                            ? `🔧 Self-Repair (${tr.repair_attempts})`
-                            : "✓ Schema Verified"}
-                        </span>
-                      </div>
-                      {tr.previous_interaction_id && (
-                        <div
-                          style={{
-                            fontSize: "10px",
-                            color: "#38bdf8",
-                            marginTop: "2px",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          ⛓ Chained from:{" "}
-                          {tr.previous_interaction_id.slice(0, 18)}...
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {hints.slice(0, 2).map((h, i) => (
+                <div key={i} style={{ background: "#f6f6f8", borderRadius: 12, padding: "9px 10px" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, fontFamily: "Pretendard, var(--sans)", marginBottom: 2 }}>
+                    “{h.line_ko}”
+                  </div>
+                  {h.translation_en && (
+                    <div style={{ fontSize: 12, color: "var(--body)", marginBottom: 2 }}>{h.translation_en}</div>
+                  )}
+                  <div className="st-hud-sub" style={{ fontSize: 11, marginBottom: 7, fontFamily: "Pretendard, var(--sans)" }}>
+                    {h.nuance_tip_ko}
+                  </div>
+                  <button
+                    type="button"
+                    className="st-pill st-pill--green"
+                    style={{ width: "100%", justifyContent: "center", padding: "7px 10px" }}
+                    onClick={() => {
+                      onSendTextTurn(h.line_ko);
+                      setHints([], "");
+                    }}
+                  >
+                    Say this line
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
       </div>
 
-      {/* BOTTOM BAR: Live Transcript Subtitle Box + Voice Mic & Text Turn Controls */}
+      {/* ---------- RIGHT: Argon trace panel (toggle) ---------- */}
+      {showTracePanel && (
+        <div
+          className="st-hud-card"
+          style={{
+            position: "absolute",
+            right: 20,
+            top: 76,
+            width: 320,
+            padding: "12px 14px",
+            pointerEvents: "auto",
+            maxHeight: "calc(100vh - 250px)",
+            overflowY: "auto",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
+            <span className="st-hud-title">Gemini 4 Argon trace</span>
+            <span style={{ fontSize: 10, color: "var(--muted)" }}>Interactions API</span>
+          </div>
+          <div className="st-hud-sub" style={{ marginBottom: 10 }}>
+            Adaptive thinking (minimal → high), schema-verified, chained by interaction id.
+          </div>
+          {directorNoteKo && (
+            <div
+              className="st-hud-sub"
+              style={{
+                background: "var(--violet-tint)",
+                borderLeft: "3px solid var(--violet)",
+                padding: "7px 9px",
+                borderRadius: 8,
+                color: "#352a9e",
+                marginBottom: 10,
+                fontFamily: "Pretendard, var(--sans)",
+              }}
+            >
+              <strong>Director's note</strong> · {directorNoteKo}
+            </div>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+            {argonTraces
+              .slice()
+              .reverse()
+              .map((tr, idx) => {
+                const badge = THINKING_BADGE[tr.thinking_level] ?? THINKING_BADGE.low;
+                return (
+                  <div
+                    key={`${tr.interaction_id}-${idx}`}
+                    style={{ border: "1px solid var(--line)", borderRadius: 10, padding: "7px 9px", fontSize: 11, background: "#fff" }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                      <strong>{tr.stage}</strong>
+                      <span
+                        style={{
+                          background: badge.bg,
+                          color: badge.text,
+                          padding: "1px 7px",
+                          borderRadius: 999,
+                          fontSize: 10,
+                          fontWeight: 700,
+                        }}
+                      >
+                        thinking: {tr.thinking_level}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", color: "var(--body)", fontSize: 10 }}>
+                      <span>{tr.latency_ms} ms</span>
+                      <span>{tr.repair_attempts > 0 ? `self-repair ×${tr.repair_attempts}` : "schema verified"}</span>
+                    </div>
+                    {tr.previous_interaction_id && (
+                      <div
+                        style={{
+                          fontSize: 10,
+                          color: "var(--violet)",
+                          marginTop: 2,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        chained from {tr.previous_interaction_id.slice(0, 18)}…
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
+      {/* ---------- CENTER: gaze reticle ---------- */}
       <div
         style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          pointerEvents: "none",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "10px",
+          gap: 6,
+        }}
+      >
+        <div
+          style={{
+            width: hoveredProp ? 14 : 8,
+            height: hoveredProp ? 14 : 8,
+            borderRadius: "50%",
+            border: `2px solid ${hoveredProp ? "#f2b705" : "rgba(255,255,255,0.6)"}`,
+            background: hoveredProp ? "rgba(242, 183, 5, 0.35)" : "transparent",
+            transition: "all 0.15s ease",
+          }}
+        />
+        {hoveredProp && (
+          <span
+            className="st-chip"
+            style={{ padding: "2px 9px", fontSize: 11, background: "var(--hud-glass)", fontFamily: "Pretendard, var(--sans)" }}
+          >
+            Looking at {hoveredProp.label_ko}
+          </span>
+        )}
+      </div>
+
+      {/* ---------- BOTTOM: film subtitles + controls ---------- */}
+      <div
+        style={{
+          position: "absolute",
+          left: 20,
+          right: 20,
+          bottom: 18,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 10,
           pointerEvents: "auto",
         }}
       >
-        {/* Character & User Live Dialogue Banner */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "820px",
-            textAlign: "center",
-            padding: "6px 20px",
-          }}
-        >
+        <div style={{ width: "100%", maxWidth: 820, textAlign: "center", padding: "6px 20px" }}>
           <div
             className="st-subtitle-line"
             style={{
-              fontSize: "22px",
+              fontSize: 22,
               lineHeight: 1.45,
-              minHeight: "30px",
+              minHeight: 30,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
             }}
           >
-            <span style={{ color: "#f2c94c", marginRight: "10px", fontSize: "15px" }}>
-              {character?.display_name_ko ?? "상대역"}
+            <span style={{ color: "#f2c94c", marginRight: 10, fontSize: 15 }}>
+              {character?.display_name_ko ?? "Counterpart"}
             </span>
-            {latestCharacterLine}
+            {latestCharacterLine.length > 140 ? "…" + latestCharacterLine.slice(-140) : latestCharacterLine}
           </div>
-
           {latestUserLine && (
             <div
               style={{
-                marginTop: "6px",
-                fontSize: "15px",
-                color: "#e7e0d4",
+                marginTop: 6,
+                fontSize: 15,
+                color: "#eeeaf0",
                 textShadow: "0 1px 2px #000, 0 2px 8px rgba(0,0,0,0.9)",
+                fontFamily: "Pretendard, var(--sans)",
               }}
             >
-              <strong style={{ color: "#9fe0b4" }}>나</strong>{" "}
-              {latestUserLine}
+              <strong style={{ color: "#9fe0b4" }}>You</strong> {latestUserLine}
             </div>
           )}
         </div>
 
-        {/* Voice Mic Button + Text Turn Input Form */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "820px",
-            display: "flex",
-            gap: "10px",
-            alignItems: "center",
-          }}
-        >
+        <div style={{ width: "100%", maxWidth: 820, display: "flex", gap: 10, alignItems: "center" }}>
           <button
             type="button"
+            className={`st-pill ${isRecording ? "st-pill--coral" : "st-pill--violet"}`}
+            style={{ padding: "12px 18px", fontSize: 13.5, borderRadius: 14 }}
             onClick={isRecording ? onStopMic : onStartMic}
-            style={{
-              background: isRecording
-                ? "linear-gradient(135deg, #ef4444, #dc2626)"
-                : "linear-gradient(135deg, #3b82f6, #2563eb)",
-              border: "none",
-              color: "#ffffff",
-              borderRadius: "14px",
-              padding: "12px 18px",
-              fontSize: "13px",
-              fontWeight: 800,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              whiteSpace: "nowrap",
-              boxShadow: isRecording
-                ? "0 0 20px rgba(239, 68, 68, 0.65)"
-                : "0 6px 18px rgba(37, 99, 235, 0.4)",
-            }}
           >
-            <span>
-              {isRecording ? "⏹ 마이크 끄기 (Live)" : "🎙️ 음성 대화 시작"}
-            </span>
+            {isRecording ? "● Stop mic" : "🎙 Start talking"}
           </button>
-
-          <form
-            onSubmit={handleTextSubmit}
-            style={{
-              flex: 1,
-              display: "flex",
-              gap: "8px",
-            }}
-          >
+          <form onSubmit={handleTextSubmit} style={{ flex: 1, display: "flex", gap: 8, minWidth: 0 }}>
             <input
               type="text"
+              className="st-hud-input"
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              placeholder="한국어로 대사를 입력해 보세요 (예: 오늘 비가 많이 오네요. 잠깐 이야기할 수 있을까요?)"
-              style={{
-                flex: 1,
-                background: "rgba(15, 23, 42, 0.9)",
-                border: "1px solid rgba(148, 163, 184, 0.35)",
-                borderRadius: "12px",
-                padding: "12px 16px",
-                color: "#f8fafc",
-                fontSize: "14px",
-                outline: "none",
-              }}
+              placeholder="Type a line in Korean (e.g. 오늘 비가 많이 오네요. 잠깐 이야기할 수 있을까요?)"
             />
             <button
               type="submit"
-              style={{
-                background: "rgba(59, 130, 246, 0.25)",
-                border: "1px solid #3b82f6",
-                color: "#93c5fd",
-                borderRadius: "12px",
-                padding: "0 18px",
-                fontSize: "13px",
-                fontWeight: 700,
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
+              className="st-pill"
+              style={{ background: "var(--hud-glass)", border: "1px solid var(--hud-line)", padding: "0 18px", borderRadius: 14 }}
             >
-              대사 전송 ↵
+              Send
             </button>
           </form>
         </div>

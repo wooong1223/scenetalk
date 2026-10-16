@@ -43,6 +43,7 @@ export function SceneCanvas({
           gesture={gesture}
           hoveredId={hoveredProp?.id ?? null}
           selectedId={inspectedProp?.id ?? null}
+          keyColorHex={world?.lighting?.key_color_hex}
           onPropOver={onPropPointerOver}
           onPropOut={onPropPointerOut}
           onPropClick={onPropClick}

@@ -33,6 +33,7 @@ interface SceneStoreState {
   argonTraces: ArgonCallTrace[];
   report: LearningReport | null;
   media: SceneMedia | null;
+  panoReady: boolean; // panorama texture uploaded to the GPU (scene visibly painted)
 
   // Live Character & Audio state
   emotion: EmotionId;
@@ -58,6 +59,7 @@ interface SceneStoreState {
   // Actions
   setSession: (sess: SessionRecord) => void;
   setMedia: (media: SceneMedia | null) => void;
+  setPanoReady: (ready: boolean) => void;
   applyStoryUpdate: (payload: {
     phase: BeatPhase;
     used_expressions: string[];
@@ -91,6 +93,7 @@ export const useSceneStore = create<SceneStoreState>((set) => ({
   argonTraces: [],
   report: null,
   media: null,
+  panoReady: false,
 
   emotion: "neutral",
   gesture: null,
@@ -118,6 +121,7 @@ export const useSceneStore = create<SceneStoreState>((set) => ({
       argonTraces: sess.argon_traces || [],
       report: sess.report || null,
       media: sess.media || null,
+      panoReady: false,
       emotion: sess.character.initial_emotion || "neutral",
       gesture: null,
       directorNoteKo: sess.last_director_note_ko || "",
@@ -131,6 +135,7 @@ export const useSceneStore = create<SceneStoreState>((set) => ({
     }),
 
   setMedia: (media) => set({ media }),
+  setPanoReady: (ready) => set({ panoReady: ready }),
 
   applyStoryUpdate: (payload) =>
     set((state) => {
@@ -188,7 +193,7 @@ export const useSceneStore = create<SceneStoreState>((set) => ({
       if (last && last.speaker === speaker && !last.final) {
         list[list.length - 1] = {
           ...last,
-          text_ko: final ? cleaned : `${last.text_ko} ${cleaned}`,
+          text_ko: cleaned, // server sends cumulative partials; replace, never append
           final,
         };
       } else {

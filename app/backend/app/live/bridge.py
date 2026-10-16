@@ -349,8 +349,8 @@ async def _pump_live_to_client(
                     if getattr(part, "inline_data", None) and part.inline_data.data:
                         b64 = base64.b64encode(part.inline_data.data).decode("ascii")
                         await _send_ws(ws, WsAudioChunkOut(pcm24_b64=b64))
-                    if getattr(part, "text", None) and not getattr(part, "thought", False):
-                        char_text_buf.append(part.text)
+                    # Text parts are NOT buffered: output_audio_transcription already
+                    # carries the spoken text, and buffering both duplicated subtitles.
 
             # Native audio transcriptions from Gemini 3.8 Live
             out_tr = getattr(sc, "output_transcription", None)

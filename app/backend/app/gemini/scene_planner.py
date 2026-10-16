@@ -16,7 +16,8 @@ _YT_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 
 _PLANNER_PROMPT = """
 You are ScenePlanner for SceneTalk, an interactive 3D K-drama roleplay and Korean language learning experience.
-Given the video scene context around timestamp {ts:.1f}s and the user's saved Korean expressions {exprs}:
+The user will step into the SITUATION of this whole clip (anchored around {ts:.1f}s) and play the protagonist's side of the conversation.
+Given the clip's dialogue and visuals and the user's saved Korean expressions {exprs}:
 1. Choose template_id from ONLY ["cafe", "generic_room"] (use "generic_room" for offices, parlors, historical rooms, or indoor chambers; use "cafe" for cafes or restaurants).
 2. Populate 4 to 6 interactive props whose `kind` is strictly from:
    ["counter", "table", "chair", "coffee_cup", "menu_board", "window", "rain_window", "door", "phone"]
@@ -64,7 +65,7 @@ async def plan_scene_with_trace(
     req: CreateSessionRequest,
 ) -> tuple[ScenePlan, ArgonCallTrace]:
     s = get_settings()
-    exprs = req.saved_expressions or ["밀정이 되란 소리예요?", "눈치를 보다"]
+    exprs = (req.saved_expressions or ["밀정이 되란 소리예요?", "눈치를 보다"])[:6]
     subtitle_window = _load_subtitle_window(req.video_id, req.timestamp_sec)
     prompt = _PLANNER_PROMPT.format(
         ts=req.timestamp_sec,

@@ -35,6 +35,7 @@ async def create_session(req: CreateSessionRequest) -> SessionRecord:
         story=plan.initial_story,
         last_interaction_id=trace.interaction_id or None,
         argon_traces=[trace],
+        user_language=req.ui_language,
     )
     await store.put(rec)
     schedule_scene_media(rec.session_id)

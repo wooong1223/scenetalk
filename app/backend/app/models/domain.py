@@ -445,8 +445,9 @@ class LearningReport(BaseModel):
 class CreateSessionRequest(BaseModel):
     video_id: str
     timestamp_sec: float = Field(ge=0)
-    saved_expressions: list[str] = Field(default_factory=list, max_length=6)
+    saved_expressions: list[str] = Field(default_factory=list, max_length=12)
     scene_screenshot_b64: str | None = None
+    ui_language: Literal["en", "fr", "es"] = "en"
 
 
 class SessionRecord(BaseModel):
@@ -463,3 +464,4 @@ class SessionRecord(BaseModel):
     last_director_note_ko: str = ""
     argon_traces: list[ArgonCallTrace] = Field(default_factory=list)
     media: SceneMedia = Field(default_factory=SceneMedia)
+    user_language: Literal["en", "fr", "es"] = "en"

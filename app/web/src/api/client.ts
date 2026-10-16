@@ -349,6 +349,7 @@ export async function createSession(payload: {
   timestamp_sec: number;
   saved_expressions: string[];
   scene_screenshot_b64?: string | null;
+  ui_language?: string;
 }): Promise<SessionRecord> {
   const res = await fetch(`${API_BASE}/api/sessions`, {
     method: "POST",
