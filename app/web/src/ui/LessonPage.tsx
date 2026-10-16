@@ -109,7 +109,7 @@ export function LessonPage({ videoId }: { videoId: string }) {
             Gemini 4 Argon이 레슨을 만드는 중
           </div>
           <div style={{ color: "var(--smoke)", marginTop: 10, fontSize: 14 }}>
-            대사에서 핵심 표현을 고르고 문제를 짜고 있어요. 처음엔 20초쯤 걸립니다.
+            대사에서 핵심 표현을 고르고 문제를 짜고 있어요. 처음 여는 영상은 30초에서 길면 2분까지 걸립니다.
           </div>
           <div className="st-shimmer" style={{ width: 260, height: 4, borderRadius: 4, margin: "26px auto 0" }} />
         </div>

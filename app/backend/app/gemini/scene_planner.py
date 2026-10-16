@@ -39,11 +39,16 @@ Subtitle context around timestamp {ts:.1f}s:
 def _load_subtitle_window(video_id: str, ts: float) -> str:
     s = get_settings()
     path = s.assets_dir / "subtitles" / f"{video_id}.json"
-    if not path.exists():
-        path = s.assets_dir / "subtitles" / f"{s.DEMO_VIDEO_ID}.json"
-    if not path.exists():
-        return "(no pre-cached subtitles found; analyze the attached YouTube video directly)"
-    track = SubtitleTrack.model_validate_json(path.read_text("utf-8"))
+    track: SubtitleTrack | None = None
+    if path.exists():
+        track = SubtitleTrack.model_validate_json(path.read_text("utf-8"))
+    else:
+        # Subtitles extracted live from YouTube by Argon are cached in memory only.
+        from .subtitle_explainer import _SUBTITLE_CACHE
+
+        track = _SUBTITLE_CACHE.get(video_id)
+    if track is None:
+        return "(no subtitles available; analyze the attached YouTube video directly)"
     window = [ln for ln in track.lines if abs(ln.start_sec - ts) <= 60.0]
     if not window:
         window = track.lines[:10]

@@ -520,7 +520,7 @@ export function LauncherPage() {
               <div>
                 <div className="st-shimmer" style={{ height: 4, borderRadius: 4 }} />
                 <div style={{ marginTop: 8, fontSize: 13, color: "var(--smoke)", lineHeight: 1.6 }}>
-                  Gemini 4 Argon이 영상 맥락을 읽고 상대 인물과 공간을 설계합니다. 그 다음 Nano Banana가 실사 장면을 그립니다. 20–40초쯤 걸려요.
+                  Gemini 4 Argon이 영상 맥락을 읽고 상대 인물과 공간을 설계합니다. 그 다음 Nano Banana가 실사 장면을 그립니다. 데모 영상은 20–40초, 새 영상은 영상을 직접 보느라 1분 안팎 걸려요.
                 </div>
               </div>
             )}
