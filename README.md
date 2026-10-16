@@ -5,7 +5,7 @@
 
 SceneTalk is for native English speakers who love K-content and want to actually *speak* Korean. Paste a YouTube link to a K-drama scene and it turns into two things (UI in English; French and Spanish are listed as coming soon):
 
-1. **Expression Lesson** — a Duolingo-style lesson built from the scene's subtitles: vocabulary cards, meaning quizzes, fill-in-the-blank and matching, with instant feedback and nuance explanations.
+1. **Expression Lesson** — a bite-sized, game-like lesson built from the scene's subtitles: vocabulary cards, meaning quizzes, fill-in-the-blank and matching, with instant feedback and nuance explanations.
 2. **Roleplay** — step *into the situation of the clip*. Nano Banana generates a photoreal 360° panorama of the setting and a full-body photoreal fictional counterpart character; Gemini 3.8 Live voices that character in real time while Gemini 4 Argon directs the story and finally grades how naturally you used the expressions you just learned.
 
 ---
@@ -44,7 +44,7 @@ Overseas K-drama fans want to *speak* like the characters, not just read subtitl
 
 ## Live service URL
 
-_Filled in at submission time (Cloud Run)._
+https://scenetalk-vkmemtikza-du.a.run.app
 
 ## Public GitHub repository URL
 

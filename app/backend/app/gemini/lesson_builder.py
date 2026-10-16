@@ -1,5 +1,5 @@
 """
-Duolingo-style lesson builder (Gemini 4 Argon, thinking_level="low").
+Bite-sized quiz lesson builder (Gemini 4 Argon, thinking_level="low").
 
 One verified call turns the subtitle track of a YouTube scene into:
   - 5–8 vocabulary cards (expression, meaning, nuance, example)
@@ -33,7 +33,7 @@ _CACHE: dict[str, Lesson] = {}
 _YT_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 
 _PROMPT = """
-You are LessonBuilder for SceneTalk, a Duolingo-style Korean learning app built on K-drama scenes.
+You are LessonBuilder for SceneTalk, a bite-sized, game-like Korean learning app built on K-drama scenes.
 From the subtitle lines below, build ONE short lesson for an intermediate learner of Korean.
 
 Rules:

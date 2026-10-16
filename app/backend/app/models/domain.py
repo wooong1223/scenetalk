@@ -66,7 +66,7 @@ class ExpressionNuance(BaseModel):
     practice_tip_ko: str
 
 
-# ---------- Duolingo-style Lesson (Gemini 4 Argon thinking_level="low") ----------
+# ---------- Quiz Lesson (Gemini 4 Argon thinking_level="low") ----------
 
 QuizKind = Literal["meaning_choice", "fill_blank", "match"]
 

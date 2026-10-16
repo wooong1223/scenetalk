@@ -50,6 +50,20 @@ async def get_session(session_id: str) -> SessionRecord:
     return rec
 
 
+@router.post("/{session_id}/media/retry", response_model=SessionRecord)
+async def retry_media(session_id: str) -> SessionRecord:
+    """Re-run scene media generation (e.g. after a server restart killed the background task)."""
+    rec = await store.get(session_id)
+    if not rec:
+        raise HTTPException(404, "Session not found")
+    if rec.media.status != "ready":
+        rec.media.status = "pending"
+        rec.media.error = None
+        await store.put(rec)
+        schedule_scene_media(rec.session_id)
+    return rec
+
+
 @router.post("/{session_id}/hint", response_model=HintResponse)
 async def hint_session(session_id: str) -> HintResponse:
     rec = await store.get(session_id)
