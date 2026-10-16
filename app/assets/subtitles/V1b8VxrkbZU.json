@@ -1,0 +1,102 @@
+{
+  "video_id": "V1b8VxrkbZU",
+  "title": "[잠입 티저] \"나는 꼭 미국에 갈 거예요\" 경성 최고의 소매치기 김유정, 조선총독부에 잠입하다. #100일의거짓말 EP.0",
+  "lines": [
+    {
+      "index": 0,
+      "start_sec": 0.0,
+      "end_sec": 3.5,
+      "text_ko": "경성역 플랫폼, 사람들의 시선을 피해 은밀하게 움직인다.",
+      "text_en": "At Gyeongseong Station platform, moving discreetly while avoiding people's eyes.",
+      "tokens": ["경성역", "시선을 피해", "은밀하게"]
+    },
+    {
+      "index": 1,
+      "start_sec": 3.5,
+      "end_sec": 7.0,
+      "text_ko": "들키지 않으려면 주변 눈치를 잘 봐야 해.",
+      "text_en": "To not get caught, you have to read the room carefully.",
+      "tokens": ["들키다", "눈치를 보다", "주변"]
+    },
+    {
+      "index": 2,
+      "start_sec": 7.0,
+      "end_sec": 9.0,
+      "text_ko": "잠깐, 지갑이 언제 사라진 거지?",
+      "text_en": "Wait, when did the wallet disappear?",
+      "tokens": ["잠깐", "사라지다"]
+    },
+    {
+      "index": 3,
+      "start_sec": 9.0,
+      "end_sec": 11.2,
+      "text_ko": "너구나, 그 소매치기가.",
+      "text_en": "So it's you, that pickpocket.",
+      "tokens": ["너구나", "소매치기"]
+    },
+    {
+      "index": 4,
+      "start_sec": 11.2,
+      "end_sec": 13.4,
+      "text_ko": "나는 꼭 미국에 갈 거예요.",
+      "text_en": "I am definitely going to go to America.",
+      "tokens": ["나는 꼭", "미국에 갈 거예요", "꼭 -(으)ㄹ 거예요"]
+    },
+    {
+      "index": 5,
+      "start_sec": 13.4,
+      "end_sec": 15.0,
+      "text_ko": "미국 보내 줄게.",
+      "text_en": "I'll send you to America.",
+      "tokens": ["보내 줄게", "-아/어 줄게"]
+    },
+    {
+      "index": 6,
+      "start_sec": 15.0,
+      "end_sec": 16.5,
+      "text_ko": "총독부에 들어가 줘.",
+      "text_en": "Infiltrate the Government-General building for me.",
+      "tokens": ["총독부", "들어가 줘", "-아/어 줘"]
+    },
+    {
+      "index": 7,
+      "start_sec": 16.5,
+      "end_sec": 19.0,
+      "text_ko": "밀정이 되란 소리예요?",
+      "text_en": "Are you telling me to become a spy?",
+      "tokens": ["밀정", "밀정이 되란 소리예요?", "-(으)란 소리예요?"]
+    },
+    {
+      "index": 8,
+      "start_sec": 19.0,
+      "end_sec": 21.0,
+      "text_ko": "백 일 동안만 정체를 숨기면 돼.",
+      "text_en": "You just have to hide your true identity for a hundred days.",
+      "tokens": ["백 일 동안", "정체를 숨기다", "-면 돼"]
+    },
+    {
+      "index": 9,
+      "start_sec": 21.0,
+      "end_sec": 23.5,
+      "text_ko": "분명히 위험해질 겁니다.",
+      "text_en": "It will definitely become dangerous.",
+      "tokens": ["분명히", "위험해질 겁니다", "-아/어지다"]
+    },
+    {
+      "index": 10,
+      "start_sec": 23.5,
+      "end_sec": 27.5,
+      "text_ko": "오늘부터 새로 부임한 통역관입니다. 잘 부탁드립니다.",
+      "text_en": "I am the newly appointed interpreter starting today. Pleased to meet you.",
+      "tokens": ["부임하다", "통역관", "잘 부탁드립니다"]
+    },
+    {
+      "index": 11,
+      "start_sec": 27.5,
+      "end_sec": 32.0,
+      "text_ko": "당신... 처음 보는 얼굴인데, 어디서 왔소?",
+      "text_en": "You... yours is an unfamiliar face, where did you come from?",
+      "tokens": ["처음 보는 얼굴", "어디서 왔소"]
+    }
+  ]
+}

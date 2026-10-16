@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "SceneTalk — Watch it. Enter it. Live the story.",
+  "version": "0.1.0",
+  "description": "Gemini 4 Argon & Gemini 3.8 Live powered K-Drama subtitle nuance coach and 1st-person 3D scene entry companion.",
+  "permissions": ["sidePanel", "activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "http://localhost:8000/*",
+    "https://*.run.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open SceneTalk Side Panel"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

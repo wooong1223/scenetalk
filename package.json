@@ -1,0 +1,19 @@
+{
+  "name": "hackathon-environment-prep",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Environment dependencies only. No hackathon submission or demo implementation.",
+  "type": "module",
+  "scripts": {
+    "check": "python3 scripts/preflight.py"
+  },
+  "dependencies": {
+    "@google/genai": "^2.30.0",
+    "dotenv": "^18.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

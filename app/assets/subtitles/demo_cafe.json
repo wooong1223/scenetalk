@@ -1,0 +1,54 @@
+{
+  "video_id": "demo_cafe",
+  "title": "[로맨스 K-드라마] 비 오는 날 서울 연남동 카페에서의 재회",
+  "lines": [
+    {
+      "index": 0,
+      "start_sec": 0.0,
+      "end_sec": 4.0,
+      "text_ko": "비도 오는데 여기까지 왜 왔어?",
+      "text_en": "It's raining, why did you come all the way here?",
+      "tokens": ["비도 오는데", "왜 왔어"]
+    },
+    {
+      "index": 1,
+      "start_sec": 4.0,
+      "end_sec": 8.5,
+      "text_ko": "아까부터 계속 내 눈치를 보는 것 같더라.",
+      "text_en": "It seemed like you kept trying to read my reaction earlier.",
+      "tokens": ["아까부터", "눈치를 보다", "-는 것 같더라"]
+    },
+    {
+      "index": 2,
+      "start_sec": 8.5,
+      "end_sec": 13.0,
+      "text_ko": "혹시 어제 연락 안 해서 아직도 삐진 거야?",
+      "text_en": "Are you still sulking because I didn't text you yesterday?",
+      "tokens": ["혹시", "삐지다", "아직도"]
+    },
+    {
+      "index": 3,
+      "start_sec": 13.0,
+      "end_sec": 17.5,
+      "text_ko": "아니거든! 그냥 커피나 한잔 마시려고 들렀어.",
+      "text_en": "No way! I just dropped by to have a cup of coffee.",
+      "tokens": ["아니거든", "커피나 한잔", "들르다"]
+    },
+    {
+      "index": 4,
+      "start_sec": 17.5,
+      "end_sec": 22.0,
+      "text_ko": "거짓말하지 마. 얼굴에 다 쓰여 있잖아.",
+      "text_en": "Don't lie. It's written all over your face.",
+      "tokens": ["거짓말하지 마", "얼굴에 다 쓰여 있다"]
+    },
+    {
+      "index": 5,
+      "start_sec": 22.0,
+      "end_sec": 27.0,
+      "text_ko": "사실은... 너한테 꼭 할 말이 있어서 기다렸어.",
+      "text_en": "Actually... I waited because I definitely had something to tell you.",
+      "tokens": ["사실은", "꼭 할 말", "기다리다"]
+    }
+  ]
+}

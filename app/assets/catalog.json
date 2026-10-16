@@ -1,0 +1,61 @@
+{
+  "templates": ["cafe", "generic_room"],
+  "props": [
+    {
+      "id": "counter",
+      "kind": "counter",
+      "label_ko": "카페 카운터 / 안내 데스크",
+      "description": "음료를 주문하거나 방문객을 맞이하는 나무 카운터"
+    },
+    {
+      "id": "table",
+      "kind": "table",
+      "label_ko": "나무 테이블 / 집무 책상",
+      "description": "마주 앉아 대화를 나누거나 기밀 문서를 올려두는 중앙 테이블"
+    },
+    {
+      "id": "chair",
+      "kind": "chair",
+      "label_ko": "원목 의자",
+      "description": "테이블 앞에 놓인 클래식 원목 의자"
+    },
+    {
+      "id": "coffee_cup",
+      "kind": "coffee_cup",
+      "label_ko": "따뜻한 커피잔 / 찻잔",
+      "description": "김이 모락모락 피어오르는 도자기 잔"
+    },
+    {
+      "id": "menu_board",
+      "kind": "menu_board",
+      "label_ko": "칠판 메뉴판 / 작전 브리핑 보드",
+      "description": "오늘의 추천 메뉴 또는 암호화된 지령이 적힌 보드"
+    },
+    {
+      "id": "window",
+      "kind": "window",
+      "label_ko": "거리 창문",
+      "description": "바깥 경성 거리나 서울 골목의 풍경과 날씨가 보이는 큰 창문"
+    },
+    {
+      "id": "rain_window",
+      "kind": "rain_window",
+      "label_ko": "빗방울 맺힌 창문",
+      "description": "빗줄기가 타고 흐르며 드라마틱한 분위기를 연출하는 창문"
+    },
+    {
+      "id": "door",
+      "kind": "door",
+      "label_ko": "출입문",
+      "description": "누군가 예고 없이 들어올 수 있는 나무 출입문"
+    },
+    {
+      "id": "phone",
+      "kind": "phone",
+      "label_ko": "앤티크 전화기 / 스마트폰",
+      "description": "긴급한 연락이나 비밀 제보가 걸려올 수 있는 전화기"
+    }
+  ],
+  "emotions": ["neutral", "happy", "sad", "angry", "surprised"],
+  "gestures": ["nod", "wave", "look_away", "smile", "shrug"]
+}
