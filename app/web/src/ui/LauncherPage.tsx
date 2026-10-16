@@ -12,8 +12,11 @@ import {
 import { useAppNavigate } from "../router";
 import { LanguageSelector, loadUiLanguage } from "./LanguageSelector";
 
-const DEMO_URL = "https://www.youtube.com/watch?v=V1b8VxrkbZU";
-const DEMO_ID = "V1b8VxrkbZU";
+// Default clip shown on first visit (Four Hands ep.11 preview)
+const DEMO_ID = "LAvAQ1VcbH0";
+const DEMO_URL = `https://www.youtube.com/watch?v=${DEMO_ID}`;
+// The curated clip that ships with hand-written starter expressions
+const CURATED_ID = "V1b8VxrkbZU";
 const DEFAULT_MISSION = ["정체를 숨기다", "밀정이 되란 소리예요?"];
 
 function fmtTime(sec: number): string {
@@ -157,7 +160,7 @@ export function LauncherPage() {
 
   // Starter mission when nothing is saved: suggest from this clip's own subtitle tokens.
   const suggestedMission = (() => {
-    if (videoId === DEMO_ID) return DEFAULT_MISSION;
+    if (videoId === CURATED_ID) return DEFAULT_MISSION;
     const seen = new Set<string>();
     const out: string[] = [];
     for (const ln of subtitles) {

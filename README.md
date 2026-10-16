@@ -48,7 +48,7 @@ https://scenetalk-vkmemtikza-du.a.run.app
 
 ## Public GitHub repository URL
 
-_This repository._
+https://github.com/wooong1223/scenetalk
 
 ## Demo video URL
 

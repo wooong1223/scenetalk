@@ -1,0 +1,252 @@
+{
+  "video_id": "LAvAQ1VcbH0",
+  "title_ko": "소문과 오해: 친구를 의심할 때",
+  "title_en": "Rumors and Misunderstandings: Doubting a Friend",
+  "vocab": [
+    {
+      "expression": "일부러",
+      "meaning_ko": "어떤 목적이나 생각을 가지고 의도적으로",
+      "meaning_en": "on purpose / intentionally",
+      "nuance_ko": "상대방의 행동에 숨겨진 의도가 있다고 의심하거나 따질 때 자주 쓰입니다.",
+      "example_ko": "내가 일부러 늦은 게 아니라 차가 너무 막혔어.",
+      "example_en": "I wasn't late on purpose; the traffic was just too heavy.",
+      "formality": "casual",
+      "source_line_ko": "최정요, 솔직히 말해 봐. 너 비오한테 일부러 그러는 거지?"
+    },
+    {
+      "expression": "당장 접다",
+      "meaning_ko": "하던 일이나 생각을 지금 바로 그만두다",
+      "meaning_en": "to stop/drop it right now",
+      "nuance_ko": "상대방의 쓸데없는 생각이나 무모한 계획을 강하게 말릴 때 쓰는 구어체 표현입니다.",
+      "example_ko": "그렇게 위험한 계획이라면 당장 접는 게 좋을 거야.",
+      "example_en": "If it's such a dangerous plan, you'd better drop it right now.",
+      "formality": "casual",
+      "source_line_ko": "너 비오가 네 납치에 관련 있단 소문 듣고 이러는 거잖아. 그런 거면 당장 접어, 절대 아니니까."
+    },
+    {
+      "expression": "확신하다",
+      "meaning_ko": "조금도 의심하지 않고 굳게 믿다",
+      "meaning_en": "to be sure / to be convinced",
+      "nuance_ko": "근거가 있든 없든 자신의 믿음이 100% 맞다고 강하게 주장할 때 사용합니다.",
+      "example_ko": "그가 이번 시험에 합격할 거라고 확신합니다.",
+      "example_en": "I am convinced that he will pass this exam.",
+      "formality": "formal",
+      "source_line_ko": "그걸 어떻게 확신합니까?"
+    },
+    {
+      "expression": "지켜보다",
+      "meaning_ko": "어떤 일이나 사람의 상태를 관심 있게 계속 바라보다",
+      "meaning_en": "to watch over / to keep an eye on",
+      "nuance_ko": "단순히 보는 것을 넘어 오랜 시간 관심을 두고 옆에서 과정을 함께했다는 뉘앙스를 줍니다.",
+      "example_ko": "부모님은 언제나 뒤에서 묵묵히 자식을 지켜보신다.",
+      "example_en": "Parents always quietly watch over their children from behind.",
+      "formality": "polite",
+      "source_line_ko": "나 너희들 옛날부터 누구보다 가까이에서 지켜본 사람이야."
+    },
+    {
+      "expression": "샅샅이 뒤지다",
+      "meaning_ko": "빈틈없이 구석구석 모두 찾아보다",
+      "meaning_en": "to search thoroughly / to comb through",
+      "nuance_ko": "무언가를 간절하게 찾기 위해 모든 장소를 빠짐없이 조사할 때 쓰는 강조 표현입니다.",
+      "example_ko": "잃어버린 반지를 찾으려고 방 안을 샅샅이 뒤졌다.",
+      "example_en": "I searched the room thoroughly to find the lost ring.",
+      "formality": "polite",
+      "source_line_ko": "지금까지 비오는 사람들 다 포기했을 때도 혼자 유럽을 샅샅이 뒤져가면서 널 찾아다녔어."
+    },
+    {
+      "expression": "그깟 소문",
+      "meaning_ko": "대수롭지 않고 하찮은 소문",
+      "meaning_en": "a mere rumor / such a trivial rumor",
+      "nuance_ko": "'그깟'은 뒤에 오는 대상을 아주 가치 없고 하찮게 여길 때 쓰는 강한 표현입니다.",
+      "example_ko": "그깟 소문에 흔들리지 말고 내 말을 믿어 줘.",
+      "example_en": "Don't be swayed by a mere rumor and believe what I say.",
+      "formality": "casual",
+      "source_line_ko": "근데 너는 어떻게 그런 친구를 그깟 소문 때문에 오해를 할 수가 있어?"
+    },
+    {
+      "expression": "실망이다",
+      "meaning_ko": "기대했던 것과 달라서 마음이 상하고 아쉽다",
+      "meaning_en": "to be disappointed (in someone/something)",
+      "nuance_ko": "친한 사이나 믿었던 상대방이 기대 이하의 행동을 했을 때 서운함을 직접적으로 드러내는 표현입니다.",
+      "example_ko": "네가 약속을 또 어기다니 정말 실망이다.",
+      "example_en": "I'm really disappointed that you broke your promise again.",
+      "formality": "casual",
+      "source_line_ko": "아, 최정요. 너한테 진짜 실망이다."
+    }
+  ],
+  "quiz": [
+    {
+      "kind": "meaning_choice",
+      "expression": "일부러",
+      "prompt_ko": "일부러 (너 비오한테 일부러 그러는 거지?)",
+      "prompt_en": "",
+      "choices": [
+        "by mistake",
+        "on purpose / intentionally",
+        "all of a sudden",
+        "secretly"
+      ],
+      "answer_index": 1,
+      "pairs": [],
+      "explanation_ko": "'일부러'는 어떤 의도나 목적을 가지고 행동할 때 쓰는 부사입니다."
+    },
+    {
+      "kind": "fill_blank",
+      "expression": "당장 접다",
+      "prompt_ko": "너 비오가 네 납치에 관련 있단 소문 듣고 이러는 거잖아. 그런 거면 ____, 절대 아니니까.",
+      "prompt_en": "You're acting like this because you heard rumors that Bi-o was involved in your kidnapping. If that's it, stop it right now, because it's absolutely not true.",
+      "choices": [
+        "당장 접어",
+        "지켜봐",
+        "확신해",
+        "샅샅이 뒤져"
+      ],
+      "answer_index": 0,
+      "pairs": [],
+      "explanation_ko": "쓸데없는 생각이나 의심을 지금 바로 그만두라고 할 때 '당장 접다'를 사용합니다."
+    },
+    {
+      "kind": "meaning_choice",
+      "expression": "샅샅이 뒤지다",
+      "prompt_ko": "샅샅이 뒤지다 (혼자 유럽을 샅샅이 뒤져가면서 널 찾아다녔어.)",
+      "prompt_en": "",
+      "choices": [
+        "to give up easily",
+        "to travel leisurely",
+        "to search thoroughly / to comb through",
+        "to hide completely"
+      ],
+      "answer_index": 2,
+      "pairs": [],
+      "explanation_ko": "'샅샅이 뒤지다'는 빠진 곳 없이 구석구석 모두 찾아본다는 뜻입니다."
+    },
+    {
+      "kind": "fill_blank",
+      "expression": "확신하다",
+      "prompt_ko": "그걸 어떻게 ____?",
+      "prompt_en": "How can you be so sure of that?",
+      "choices": [
+        "실망합니까",
+        "뒤집니까",
+        "접습니까",
+        "확신합니까"
+      ],
+      "answer_index": 3,
+      "pairs": [],
+      "explanation_ko": "조금도 의심하지 않고 굳게 믿는다는 뜻의 '확신하다'가 들어가는 것이 알맞습니다."
+    },
+    {
+      "kind": "match",
+      "expression": "지켜보다",
+      "prompt_ko": "알맞은 뜻끼리 연결해 보세요.",
+      "prompt_en": "Match the Korean expressions with their English meanings.",
+      "choices": [],
+      "answer_index": 0,
+      "pairs": [
+        {
+          "ko": "일부러",
+          "en": "on purpose"
+        },
+        {
+          "ko": "지켜보다",
+          "en": "to watch over"
+        },
+        {
+          "ko": "그깟 소문",
+          "en": "a mere rumor"
+        },
+        {
+          "ko": "실망이다",
+          "en": "to be disappointed"
+        }
+      ],
+      "explanation_ko": "대화에서 감정을 표현하거나 상황을 설명할 때 자주 쓰이는 핵심 표현들입니다."
+    },
+    {
+      "kind": "fill_blank",
+      "expression": "그깟 소문",
+      "prompt_ko": "근데 너는 어떻게 그런 친구를 ____ 때문에 오해를 할 수가 있어?",
+      "prompt_en": "How could you misunderstand such a friend over a mere rumor?",
+      "choices": [
+        "그깟 소문",
+        "옛날부터",
+        "납치 소문",
+        "누구보다"
+      ],
+      "answer_index": 0,
+      "pairs": [],
+      "explanation_ko": "소문을 가치 없고 하찮게 여기며 강조할 때 '그깟 소문'이라고 표현합니다."
+    },
+    {
+      "kind": "meaning_choice",
+      "expression": "실망이다",
+      "prompt_ko": "실망이다 (아, 최정요. 너한테 진짜 실망이다.)",
+      "prompt_en": "",
+      "choices": [
+        "to be proud of",
+        "to be disappointed",
+        "to be grateful",
+        "to be relieved"
+      ],
+      "answer_index": 1,
+      "pairs": [],
+      "explanation_ko": "상대방이 기대에 미치지 못해 마음이 상했을 때 '실망이다'라고 말합니다."
+    },
+    {
+      "kind": "fill_blank",
+      "expression": "지켜보다",
+      "prompt_ko": "나 너희들 옛날부터 누구보다 가까이에서 ____ 사람이야.",
+      "prompt_en": "I'm someone who has watched you guys closer than anyone else since the old days.",
+      "choices": [
+        "포기한",
+        "오해한",
+        "지켜본",
+        "확인한"
+      ],
+      "answer_index": 2,
+      "pairs": [],
+      "explanation_ko": "오랜 시간 관심을 가지고 옆에서 바라보았다는 의미로 '지켜보다(지켜본)'가 적절합니다."
+    },
+    {
+      "kind": "match",
+      "expression": "샅샅이 뒤지다",
+      "prompt_ko": "알맞은 뜻끼리 연결해 보세요.",
+      "prompt_en": "Match the Korean expressions with their English meanings.",
+      "choices": [],
+      "answer_index": 0,
+      "pairs": [
+        {
+          "ko": "당장 접다",
+          "en": "to drop it right now"
+        },
+        {
+          "ko": "확신하다",
+          "en": "to be convinced"
+        },
+        {
+          "ko": "샅샅이 뒤지다",
+          "en": "to search thoroughly"
+        },
+        {
+          "ko": "실망이다",
+          "en": "to be disappointed"
+        }
+      ],
+      "explanation_ko": "상대방을 설득하거나 감정을 강하게 드러낼 때 유용한 표현들입니다."
+    }
+  ],
+  "argon_trace": {
+    "stage": "lesson_builder",
+    "model": "gemini-4-argon",
+    "thinking_level": "low",
+    "interaction_id": "v1_ChdicTNSYXIyMUNJSElyZmNQME8yWXdRbxIXYnEzUmFyMjFDSUhJcmZjUDBPMll3UW8",
+    "previous_interaction_id": null,
+    "latency_ms": 89135,
+    "repair_attempts": 1,
+    "fallback_used": false,
+    "modalities": [
+      "text"
+    ],
+    "summary_ko": "자막 기반 듀오링고형 레슨 생성 (어휘 카드 + 퀴즈)"
+  }
+}
