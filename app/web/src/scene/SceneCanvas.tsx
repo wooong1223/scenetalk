@@ -26,7 +26,10 @@ export function SceneCanvas({
     sendObjectSelected
   );
 
-  const isRain = world?.weather === "rain";
+  // Rain streaks are disabled: most generated sets are interiors, where a
+  // full-screen rain overlay reads as a glitch. Weather still drives the
+  // story (director notes, lighting) without a visual overlay.
+  const isRain = false && world?.weather === "rain";
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1, background: "#0c0a09" }}>
