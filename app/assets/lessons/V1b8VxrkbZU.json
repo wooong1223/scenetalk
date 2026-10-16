@@ -1,0 +1,252 @@
+{
+  "video_id": "V1b8VxrkbZU",
+  "title_ko": "100일간의 위험한 잠입",
+  "title_en": "A Dangerous 100-Day Infiltration",
+  "vocab": [
+    {
+      "expression": "시선을 피하다",
+      "meaning_ko": "다른 사람이 보지 못하게 눈을 마주치지 않다",
+      "meaning_en": "to avoid attention / to avoid someone's eyes",
+      "nuance_ko": "몰래 행동하거나 부끄러울 때 남들의 눈길을 의식하며 피하는 상황에서 쓰입니다.",
+      "example_ko": "그는 기자들의 시선을 피해 뒷문으로 나갔다.",
+      "example_en": "He exited through the back door to avoid the reporters' eyes.",
+      "formality": "polite",
+      "source_line_ko": "경성역 플랫폼, 사람들의 시선을 피해 은밀하게 움직인다."
+    },
+    {
+      "expression": "눈치를 보다",
+      "meaning_ko": "남의 기분이나 주변 분위기를 살피다",
+      "meaning_en": "to read the room / to watch someone's reaction",
+      "nuance_ko": "상대방의 기분을 상하게 하지 않으려거나 위기 상황에서 주변을 조심스럽게 살필 때 자주 씁니다.",
+      "example_ko": "신입 사원은 회의 시간 내내 상사의 눈치를 봤다.",
+      "example_en": "The new employee watched the boss's reaction throughout the meeting.",
+      "formality": "casual",
+      "source_line_ko": "들키지 않으려면 주변 눈치를 잘 봐야 해."
+    },
+    {
+      "expression": "꼭 -(으)ㄹ 거예요",
+      "meaning_ko": "무슨 일이 있어도 반드시 어떤 일을 하겠다는 강한 의지를 나타내다",
+      "meaning_en": "will definitely (do something)",
+      "nuance_ko": "자신의 목표나 다짐을 정중하면서도 단호하게 말할 때 사용합니다.",
+      "example_ko": "올해는 꼭 한국어 시험에 합격할 거예요.",
+      "example_en": "I will definitely pass the Korean exam this year.",
+      "formality": "polite",
+      "source_line_ko": "나는 꼭 미국에 갈 거예요."
+    },
+    {
+      "expression": "-(으)란 소리예요?",
+      "meaning_ko": "상대방의 말이 어떤 뜻인지 믿기 힘들어 따지듯이 되묻다",
+      "meaning_en": "Are you telling me to...? / Do you mean I should...?",
+      "nuance_ko": "상대방의 황당하거나 무리한 요구에 놀라거나 어이없어하며 반문할 때 쓰는 구어체 표현입니다.",
+      "example_ko": "지금 이 많은 일을 혼자 다 하란 소리예요?",
+      "example_en": "Are you telling me to do all this work by myself right now?",
+      "formality": "polite",
+      "source_line_ko": "밀정이 되란 소리예요?"
+    },
+    {
+      "expression": "정체를 숨기다",
+      "meaning_ko": "자신이 원래 누구인지 남에게 알리지 않고 감추다",
+      "meaning_en": "to hide one's true identity",
+      "nuance_ko": "스파이물이나 드라마에서 비밀스러운 목적을 위해 신분을 위장할 때 핵심적으로 쓰이는 표현입니다.",
+      "example_ko": "그 영웅은 평소에 정체를 숨기고 평범하게 살아간다.",
+      "example_en": "The hero usually lives an ordinary life hiding his true identity.",
+      "formality": "casual",
+      "source_line_ko": "백 일 동안만 정체를 숨기면 돼."
+    },
+    {
+      "expression": "잘 부탁드립니다",
+      "meaning_ko": "앞으로 좋은 관계를 맺거나 도움을 바랄 때 하는 인사말",
+      "meaning_en": "Pleased to meet you / I look forward to working with you",
+      "nuance_ko": "새로운 직장이나 모임에서 처음 만나는 사람들에게 예의를 갖추어 인사할 때 필수적인 격식 표현입니다.",
+      "example_ko": "오늘부터 함께 일하게 된 김민수입니다. 잘 부탁드립니다.",
+      "example_en": "I'm Kim Minsu, and I'll be working with you starting today. I look forward to working with you.",
+      "formality": "formal",
+      "source_line_ko": "오늘부터 새로 부임한 통역관입니다. 잘 부탁드립니다."
+    },
+    {
+      "expression": "처음 보는 얼굴",
+      "meaning_ko": "전에는 본 적이 없는 낯선 사람",
+      "meaning_en": "an unfamiliar face / someone seen for the first time",
+      "nuance_ko": "새로운 사람을 발견하고 호기심이나 경계심을 드러낼 때 자연스럽게 쓰는 표현입니다.",
+      "example_ko": "모임에 처음 보는 얼굴들이 꽤 많네요.",
+      "example_en": "There are quite a lot of unfamiliar faces at the gathering.",
+      "formality": "casual",
+      "source_line_ko": "당신... 처음 보는 얼굴인데, 어디서 왔소?"
+    }
+  ],
+  "quiz": [
+    {
+      "kind": "meaning_choice",
+      "expression": "눈치를 보다",
+      "prompt_ko": "들키지 않으려면 주변 눈치를 잘 봐야 해. — '눈치를 보다'",
+      "prompt_en": "",
+      "choices": [
+        "to read the room / watch reactions",
+        "to close one's eyes tightly",
+        "to look for a lost wallet",
+        "to make direct eye contact"
+      ],
+      "answer_index": 0,
+      "pairs": [],
+      "explanation_ko": "'눈치를 보다'는 주변 상황이나 남의 기분을 조심스럽게 살핀다는 뜻입니다."
+    },
+    {
+      "kind": "fill_blank",
+      "expression": "시선을 피하다",
+      "prompt_ko": "경성역 플랫폼, 사람들의 ____ 은밀하게 움직인다.",
+      "prompt_en": "At Gyeongseong Station platform, moving discreetly while avoiding people's eyes.",
+      "choices": [
+        "정체를 숨겨",
+        "시선을 피해",
+        "눈치를 봐서",
+        "얼굴을 보고"
+      ],
+      "answer_index": 1,
+      "pairs": [],
+      "explanation_ko": "남들의 눈에 띄지 않게 눈길을 피한다는 뜻의 '시선을 피해'가 알맞습니다."
+    },
+    {
+      "kind": "meaning_choice",
+      "expression": "-(으)란 소리예요?",
+      "prompt_ko": "밀정이 되란 소리예요? — '-(으)란 소리예요?'",
+      "prompt_en": "",
+      "choices": [
+        "Can you hear that loud sound?",
+        "Are you telling me to do my best?",
+        "Are you telling me to...?",
+        "Did you hear the rumor that...?"
+      ],
+      "answer_index": 2,
+      "pairs": [],
+      "explanation_ko": "'-(으)란 소리예요?'는 상대방의 황당한 요구나 말의 의도를 따지듯 되물을 때 씁니다."
+    },
+    {
+      "kind": "fill_blank",
+      "expression": "정체를 숨기다",
+      "prompt_ko": "백 일 동안만 ____ 돼.",
+      "prompt_en": "You just have to hide your true identity for a hundred days.",
+      "choices": [
+        "시선을 피하면",
+        "눈치를 보면",
+        "미국에 가면",
+        "정체를 숨기면"
+      ],
+      "answer_index": 3,
+      "pairs": [],
+      "explanation_ko": "자신이 누구인지 감춘다는 뜻의 '정체를 숨기면'이 문맥에 맞습니다."
+    },
+    {
+      "kind": "match",
+      "expression": "",
+      "prompt_ko": "한국어 표현과 영어 뜻을 알맞게 연결하세요.",
+      "prompt_en": "Match the Korean expressions with their English meanings.",
+      "choices": [],
+      "answer_index": 0,
+      "pairs": [
+        {
+          "ko": "시선을 피하다",
+          "en": "to avoid attention"
+        },
+        {
+          "ko": "눈치를 보다",
+          "en": "to read the room"
+        },
+        {
+          "ko": "정체를 숨기다",
+          "en": "to hide one's true identity"
+        },
+        {
+          "ko": "처음 보는 얼굴",
+          "en": "an unfamiliar face"
+        }
+      ],
+      "explanation_ko": "잠입 및 긴장감 넘치는 장면에서 자주 쓰이는 핵심 어휘들입니다."
+    },
+    {
+      "kind": "meaning_choice",
+      "expression": "잘 부탁드립니다",
+      "prompt_ko": "오늘부터 새로 부임한 통역관입니다. 잘 부탁드립니다.",
+      "prompt_en": "",
+      "choices": [
+        "Please forgive my mistake.",
+        "I look forward to working with you.",
+        "Thank you for your hard work.",
+        "Please give me a favor right now."
+      ],
+      "answer_index": 1,
+      "pairs": [],
+      "explanation_ko": "'잘 부탁드립니다'는 첫인사에서 앞으로 잘 지내보자고 정중히 말할 때 씁니다."
+    },
+    {
+      "kind": "fill_blank",
+      "expression": "꼭 -(으)ㄹ 거예요",
+      "prompt_ko": "나는 ____ 미국에 갈 거예요.",
+      "prompt_en": "I am definitely going to go to America.",
+      "choices": [
+        "꼭",
+        "잠깐",
+        "새로",
+        "처음"
+      ],
+      "answer_index": 0,
+      "pairs": [],
+      "explanation_ko": "강한 의지나 다짐을 나타낼 때는 부사 '꼭'을 함께 사용합니다."
+    },
+    {
+      "kind": "fill_blank",
+      "expression": "처음 보는 얼굴",
+      "prompt_ko": "당신... ____인데, 어디서 왔소?",
+      "prompt_en": "You... yours is an unfamiliar face, where did you come from?",
+      "choices": [
+        "새로 부임한 통역관",
+        "정체를 숨긴 사람",
+        "처음 보는 얼굴",
+        "눈치를 보는 모양"
+      ],
+      "answer_index": 2,
+      "pairs": [],
+      "explanation_ko": "전에 본 적이 없는 낯선 사람을 뜻하는 '처음 보는 얼굴'이 정답입니다."
+    },
+    {
+      "kind": "match",
+      "expression": "",
+      "prompt_ko": "한국어 표현과 영어 뜻을 알맞게 연결하세요.",
+      "prompt_en": "Match the Korean expressions with their English meanings.",
+      "choices": [],
+      "answer_index": 0,
+      "pairs": [
+        {
+          "ko": "꼭 -(으)ㄹ 거예요",
+          "en": "will definitely..."
+        },
+        {
+          "ko": "-(으)란 소리예요?",
+          "en": "Are you telling me to...?"
+        },
+        {
+          "ko": "잘 부탁드립니다",
+          "en": "Pleased to meet you"
+        },
+        {
+          "ko": "처음 보는 얼굴",
+          "en": "an unfamiliar face"
+        }
+      ],
+      "explanation_ko": "대화에서 화자의 태도와 의도를 분명하게 드러내는 표현들입니다."
+    }
+  ],
+  "argon_trace": {
+    "stage": "lesson_builder",
+    "model": "gemini-4-argon",
+    "thinking_level": "low",
+    "interaction_id": "v1_Chd1cW5SYXNDUUg4X2QxZThQMnNHcmlBRRIXdXFuUmFzQ1FIOF9kMWU4UDJzR3JpQUU",
+    "previous_interaction_id": null,
+    "latency_ms": 29903,
+    "repair_attempts": 0,
+    "fallback_used": false,
+    "modalities": [
+      "text"
+    ],
+    "summary_ko": "자막 기반 듀오링고형 레슨 생성 (어휘 카드 + 퀴즈)"
+  }
+}

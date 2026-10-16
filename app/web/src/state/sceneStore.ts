@@ -9,6 +9,7 @@ import {
   LearningReport,
   LightingPreset,
   PropSpec,
+  SceneMedia,
   SessionRecord,
   StoryEvent,
   StoryState,
@@ -31,6 +32,7 @@ interface SceneStoreState {
   story: StoryState | null;
   argonTraces: ArgonCallTrace[];
   report: LearningReport | null;
+  media: SceneMedia | null;
 
   // Live Character & Audio state
   emotion: EmotionId;
@@ -55,6 +57,7 @@ interface SceneStoreState {
 
   // Actions
   setSession: (sess: SessionRecord) => void;
+  setMedia: (media: SceneMedia | null) => void;
   applyStoryUpdate: (payload: {
     phase: BeatPhase;
     used_expressions: string[];
@@ -87,6 +90,7 @@ export const useSceneStore = create<SceneStoreState>((set) => ({
   story: null,
   argonTraces: [],
   report: null,
+  media: null,
 
   emotion: "neutral",
   gesture: null,
@@ -113,6 +117,7 @@ export const useSceneStore = create<SceneStoreState>((set) => ({
       story: sess.story,
       argonTraces: sess.argon_traces || [],
       report: sess.report || null,
+      media: sess.media || null,
       emotion: sess.character.initial_emotion || "neutral",
       gesture: null,
       directorNoteKo: sess.last_director_note_ko || "",
@@ -124,6 +129,8 @@ export const useSceneStore = create<SceneStoreState>((set) => ({
         timestamp: Date.now() - (sess.transcript.length - idx) * 1000,
       })),
     }),
+
+  setMedia: (media) => set({ media }),
 
   applyStoryUpdate: (payload) =>
     set((state) => {

@@ -20,29 +20,31 @@ _YT_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 
 
 async def explain_expression(req: ExplainRequest) -> ExpressionNuance:
-    key = (req.video_id, req.target_expression.strip())
+    expr_clean = req.target_expression.strip()
+    key = (req.video_id, expr_clean)
     if key in _CACHE:
         return _CACHE[key]
 
     s = get_settings()
     prompt = (
-        "You are a Korean language & K-drama nuance coach for overseas K-content learners.\n"
+        "You are a Korean language & K-drama nuance coach.\n"
         f"Video ID: {req.video_id} (timestamp {req.timestamp_sec:.1f}s)\n"
         f"Scene dialogue line: {req.line_ko}\n"
-        f"Target Korean expression: {req.target_expression}\n\n"
-        "Explain the exact meaning in Korean (`meaning_ko`) and English (`meaning_en`), "
-        "its social/emotional nuance and politeness level (`nuance_note`, `formality`), "
-        "2–3 natural Korean example sentences (`examples_ko`), and a 1-sentence roleplay "
-        "speaking tip (`practice_tip_ko`) for using this expression inside the scene."
+        f"Target Korean expression: {expr_clean}\n\n"
+        "Concise JSON: exact meaning in Korean (`meaning_ko`) and English (`meaning_en`), "
+        "social/emotional nuance and politeness level (`nuance_note`, `formality`), "
+        "2 natural Korean example sentences (`examples_ko`), and a 1-sentence roleplay "
+        "speaking tip (`practice_tip_ko`)."
     )
     res = await verified_call(
         client=get_genai_client(),
         model=s.GEMINI_PLANNER_MODEL,
         prompt=prompt,
-        schema=SubtitleTrack if False else ExpressionNuance,
-        thinking_level="low",
-        timeout_sec=30.0,
-        fallback_factory=lambda: fallback_nuance(req.target_expression),
+        schema=ExpressionNuance,
+        thinking_level="minimal",
+        timeout_sec=10.0,
+        fallback_factory=lambda: fallback_nuance(expr_clean),
+        max_retries=1,
     )
     _CACHE[key] = res
     return res

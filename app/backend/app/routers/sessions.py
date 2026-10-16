@@ -3,6 +3,7 @@ import uuid
 from fastapi import APIRouter, HTTPException
 from ..gemini.hint_coach import generate_instant_hints
 from ..gemini.learning_verifier import build_learning_report
+from ..gemini.media import schedule_scene_media
 from ..gemini.scene_planner import plan_scene_with_trace
 from ..models.domain import (
     CreateSessionRequest,
@@ -36,6 +37,7 @@ async def create_session(req: CreateSessionRequest) -> SessionRecord:
         argon_traces=[trace],
     )
     await store.put(rec)
+    schedule_scene_media(rec.session_id)
     return rec
 
 

@@ -179,6 +179,14 @@ export interface LearningReport {
   story_comparison_ko: string;
 }
 
+export interface SceneMedia {
+  status: "pending" | "partial" | "ready" | "failed";
+  panorama_url: string | null;
+  character_urls: Partial<Record<EmotionId, string>>;
+  model: string;
+  updated_at: string;
+}
+
 export interface SessionRecord {
   session_id: string;
   created_at: string;
@@ -192,6 +200,83 @@ export interface SessionRecord {
   last_interaction_id?: string | null;
   last_director_note_ko: string;
   argon_traces: ArgonCallTrace[];
+  media?: SceneMedia | null;
+}
+
+export interface LessonVocab {
+  expression: string;
+  meaning_ko: string;
+  meaning_en: string;
+  nuance_ko: string;
+  example_ko: string;
+  example_en: string;
+  formality: "casual" | "polite" | "formal";
+  source_line_ko: string;
+}
+
+export interface MatchPair {
+  ko: string;
+  en: string;
+}
+
+export interface QuizItem {
+  kind: "meaning_choice" | "fill_blank" | "match";
+  expression: string;
+  prompt_ko: string;
+  prompt_en: string;
+  choices: string[];
+  answer_index: number;
+  pairs: MatchPair[];
+  explanation_ko: string;
+}
+
+export interface Lesson {
+  video_id: string;
+  title_ko: string;
+  title_en: string;
+  vocab: LessonVocab[];
+  quiz: QuizItem[];
+  argon_trace?: ArgonCallTrace | null;
+}
+
+export function parseYoutubeId(input: string): string | null {
+  const s = input.trim();
+  if (!s) return null;
+  if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
+  try {
+    const url = new URL(s.startsWith("http") ? s : `https://${s}`);
+    if (url.hostname.includes("youtu.be")) {
+      const id = url.pathname.replace("/", "").split("/")[0];
+      return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : null;
+    }
+    const v = url.searchParams.get("v");
+    if (v && /^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+    const m = url.pathname.match(/\/(shorts|embed|live)\/([A-Za-z0-9_-]{11})/);
+    if (m) return m[2];
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+const SAVED_PREFIX = "scenetalk.saved.";
+
+export function loadSavedExpressions(videoId: string): string[] {
+  try {
+    const raw = localStorage.getItem(SAVED_PREFIX + videoId);
+    const arr = raw ? (JSON.parse(raw) as unknown) : [];
+    return Array.isArray(arr) ? arr.filter((x) => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export function storeSavedExpressions(videoId: string, exprs: string[]): void {
+  try {
+    localStorage.setItem(SAVED_PREFIX + videoId, JSON.stringify(exprs));
+  } catch {
+    // ignore
+  }
 }
 
 export type WsServerMessage =
@@ -233,9 +318,19 @@ export async function getHealth(): Promise<{
   return res.json();
 }
 
-export async function getSubtitles(videoId: string): Promise<SubtitleTrack> {
-  const res = await fetch(`${API_BASE}/api/subtitles/${encodeURIComponent(videoId)}`);
+export async function getSubtitles(
+  videoId: string,
+  extract = true
+): Promise<SubtitleTrack> {
+  const q = extract ? "?extract=true" : "";
+  const res = await fetch(`${API_BASE}/api/subtitles/${encodeURIComponent(videoId)}${q}`);
   if (!res.ok) throw new Error(`Failed to fetch subtitles: ${res.status}`);
+  return res.json();
+}
+
+export async function getLesson(videoId: string): Promise<Lesson> {
+  const res = await fetch(`${API_BASE}/api/lessons/${encodeURIComponent(videoId)}`);
+  if (!res.ok) throw new Error(`Failed to build lesson: ${res.status}`);
   return res.json();
 }
 

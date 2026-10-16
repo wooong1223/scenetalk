@@ -72,7 +72,7 @@ async def test_health_and_subtitles_and_session_lifecycle(monkeypatch):
         assert len(rep["expression_results"]) == 2
 
         # Verify built SPA routes and 3D VRM asset mount
-        for route in ("/", f"/scene/{sid}", f"/result/{sid}", "/assets/vrm/sample_a.vrm"):
+        for route in ("/", f"/scene/{sid}", f"/result/{sid}", "/assets/generated/demo/pano.jpg"):
             r_static = await ac.get(route)
             assert r_static.status_code == 200, f"Route {route} returned {r_static.status_code}"
 

@@ -26,3 +26,9 @@ app/web/dist/
 .DS_Store
 .idea/
 .vscode/
+
+# Generated scene media / lessons (keep only the committed demo fallbacks)
+app/assets/generated/*
+!app/assets/generated/demo/
+app/assets/lessons/*
+!app/assets/lessons/V1b8VxrkbZU.json

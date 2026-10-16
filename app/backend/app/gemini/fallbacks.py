@@ -98,7 +98,11 @@ def fallback_scene_plan(
                 initial_emotion="neutral",
                 secret_or_tension_ko="이번 총독부 잠입 작전이 생각보다 훨씬 위험해 당신을 끝까지 지켜야 한다는 책임감을 느끼고 있다.",
                 opening_line_ko="너구나, 소문으로만 듣던 그 실력자가. 미국에 꼭 가고 싶다고 했나? 내 제안을 들을 준비가 됐는지 말해 봐요.",
-                voice_name="Kore",
+                voice_name="Charon",
+                appearance_prompt_en=(
+                    "A fictional Korean man in his early 30s in 1930s Gyeongseong, slicked-back hair, "
+                    "dark three-piece wool suit with a white shirt and dark tie, composed and watchful."
+                ),
             ),
             initial_story=StoryState(
                 phase="opening",

@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import get_settings
 from .live.bridge import run_live_bridge
-from .routers import sessions, subtitles
+from .routers import lessons, sessions, subtitles
 from .services.session_store import store
 
 logging.basicConfig(
@@ -25,6 +25,7 @@ app.add_middleware(
 
 app.include_router(subtitles.router)
 app.include_router(sessions.router)
+app.include_router(lessons.router)
 
 
 @app.get("/api/health")
@@ -48,14 +49,27 @@ async def ws_session(ws: WebSocket, session_id: str) -> None:
 
 
 s = get_settings()
-if s.assets_dir.exists():
-    app.mount("/assets", StaticFiles(directory=s.assets_dir), name="assets")
+# NOTE: /assets/* is mounted per-subfolder (not the whole dir) because the Vite build
+# also emits /assets/index-*.js under web/dist, served by the catch-all mount below.
+(s.assets_dir / "generated").mkdir(parents=True, exist_ok=True)
+app.mount(
+    "/assets/generated",
+    StaticFiles(directory=s.assets_dir / "generated"),
+    name="assets_generated",
+)
+if (s.assets_dir / "subtitles").exists():
+    app.mount(
+        "/assets/subtitles",
+        StaticFiles(directory=s.assets_dir / "subtitles"),
+        name="assets_subtitles",
+    )
 
 if s.web_dist_dir.exists():
     index_html = s.web_dist_dir / "index.html"
 
     @app.get("/scene/{rest_of_path:path}")
     @app.get("/result/{rest_of_path:path}")
+    @app.get("/learn/{rest_of_path:path}")
     async def spa_routes(rest_of_path: str) -> FileResponse:
         return FileResponse(index_html)
 

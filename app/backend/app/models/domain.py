@@ -14,6 +14,7 @@ ArgonStageId = Literal[
     "hint_coach",
     "learning_verifier",
     "youtube_extractor",
+    "lesson_builder",
 ]
 
 
@@ -63,6 +64,80 @@ class ExpressionNuance(BaseModel):
     formality: Literal["casual", "polite", "formal"]
     examples_ko: list[str] = Field(min_length=2, max_length=3)
     practice_tip_ko: str
+
+
+# ---------- Duolingo-style Lesson (Gemini 4 Argon thinking_level="low") ----------
+
+QuizKind = Literal["meaning_choice", "fill_blank", "match"]
+
+
+class LessonVocab(BaseModel):
+    expression: str
+    meaning_ko: str
+    meaning_en: str
+    nuance_ko: str = ""
+    example_ko: str = ""
+    example_en: str = ""
+    formality: Literal["casual", "polite", "formal"] = "polite"
+    source_line_ko: str = ""
+
+    @field_validator("formality", mode="before")
+    @classmethod
+    def _coerce_formality(cls, v: Any) -> str:
+        s = str(v or "polite").strip().lower()
+        return s if s in ("casual", "polite", "formal") else "polite"
+
+
+class MatchPair(BaseModel):
+    ko: str
+    en: str
+
+
+class QuizItem(BaseModel):
+    kind: QuizKind
+    expression: str = ""
+    prompt_ko: str = Field(
+        default="",
+        description="Question text. For fill_blank: the Korean sentence with the target replaced by ____",
+    )
+    prompt_en: str = Field(default="", description="English translation / hint")
+    choices: list[str] = Field(
+        default_factory=list,
+        description="Exactly 4 options for meaning_choice / fill_blank; empty for match",
+    )
+    answer_index: int = Field(default=0, ge=0, le=3)
+    pairs: list[MatchPair] = Field(
+        default_factory=list,
+        description="Exactly 4 ko/en pairs for match; empty otherwise",
+    )
+    explanation_ko: str = ""
+
+    @field_validator("kind", mode="before")
+    @classmethod
+    def _coerce_kind(cls, v: Any) -> str:
+        s = str(v or "meaning_choice").strip().lower()
+        return s if s in ("meaning_choice", "fill_blank", "match") else "meaning_choice"
+
+
+class Lesson(BaseModel):
+    video_id: str
+    title_ko: str
+    title_en: str = ""
+    vocab: list[LessonVocab] = Field(min_length=3, max_length=10)
+    quiz: list[QuizItem] = Field(min_length=3, max_length=14)
+    argon_trace: ArgonCallTrace | None = None
+
+
+# ---------- Generated Scene Media (gemini-nano-banana-2.1) ----------
+
+
+class SceneMedia(BaseModel):
+    status: Literal["pending", "partial", "ready", "failed"] = "pending"
+    panorama_url: str | None = None
+    character_urls: dict[str, str] = Field(default_factory=dict)
+    model: str = "gemini-nano-banana-2.1"
+    updated_at: str = ""
+    error: str | None = None
 
 
 # ---------- 3D World & Character ----------
@@ -186,6 +261,10 @@ class WorldSpec(BaseModel):
     lighting: LightingSpec = Field(default_factory=LightingSpec)
     props: list[PropSpec] = Field(min_length=3, max_length=10)
     background_mood_tags: list[str] = Field(default_factory=list, max_length=5)
+    backdrop_prompt_en: str = Field(
+        default="",
+        description="English prompt for a photoreal 360 panorama of this setting (no people, no text)",
+    )
 
     @field_validator("background_mood_tags", mode="before")
     @classmethod
@@ -212,6 +291,10 @@ class CharacterSpec(BaseModel):
     )
     opening_line_ko: str
     voice_name: str = "Kore"
+    appearance_prompt_en: str = Field(
+        default="",
+        description="English prompt describing this fictional character's look (age, gender, era clothing, hair) for a photoreal portrait",
+    )
 
 
 # ---------- Story & Session State ----------
@@ -379,3 +462,4 @@ class SessionRecord(BaseModel):
     last_interaction_id: str | None = None
     last_director_note_ko: str = ""
     argon_traces: list[ArgonCallTrace] = Field(default_factory=list)
+    media: SceneMedia = Field(default_factory=SceneMedia)

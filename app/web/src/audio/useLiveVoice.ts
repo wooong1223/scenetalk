@@ -31,14 +31,26 @@ export function useLiveVoice(sessionId: string | null) {
   const micCtxRef = useRef<AudioContext | null>(null);
   const micProcRef = useRef<ScriptProcessorNode | null>(null);
 
-  const {
-    setWsConnected,
-    setIsRecording,
-    setMouthOpen,
-    setCharacterState,
-    applyStoryUpdate,
-    upsertTranscript,
-  } = useSceneStore();
+  const setWsConnected = useSceneStore((s) => s.setWsConnected);
+  const setIsRecording = useSceneStore((s) => s.setIsRecording);
+  const setMouthOpen = useSceneStore((s) => s.setMouthOpen);
+  const setCharacterState = useSceneStore((s) => s.setCharacterState);
+  const applyStoryUpdate = useSceneStore((s) => s.applyStoryUpdate);
+  const upsertTranscript = useSceneStore((s) => s.upsertTranscript);
+
+  useEffect(() => {
+    const unlock = () => {
+      if (playCtxRef.current && playCtxRef.current.state === "suspended") {
+        playCtxRef.current.resume().catch(() => {});
+      }
+    };
+    window.addEventListener("pointerdown", unlock);
+    window.addEventListener("keydown", unlock);
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, []);
 
   const enqueueAudioChunk = useCallback(
     (pcm24B64: string) => {
@@ -48,7 +60,7 @@ export function useLiveVoice(sessionId: string | null) {
         }
         const ctx = playCtxRef.current;
         if (ctx.state === "suspended") {
-          ctx.resume();
+          ctx.resume().catch(() => {});
         }
 
         const int16 = base64ToInt16Array(pcm24B64);
@@ -93,58 +105,71 @@ export function useLiveVoice(sessionId: string | null) {
 
   useEffect(() => {
     if (!sessionId) return;
+    let disposed = false;
+    let reconnectTimer: number | null = null;
 
-    const wsUrl = getWsUrl(sessionId);
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+    const connectWs = () => {
+      if (disposed) return;
+      const wsUrl = getWsUrl(sessionId);
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
 
-    ws.onopen = () => {
-      setWsConnected(true);
-    };
+      ws.onopen = () => {
+        if (!disposed) setWsConnected(true);
+      };
 
-    ws.onclose = () => {
-      setWsConnected(false);
-    };
+      ws.onclose = () => {
+        if (disposed) return;
+        setWsConnected(false);
+        reconnectTimer = window.setTimeout(connectWs, 1500);
+      };
 
-    ws.onerror = () => {
-      setWsConnected(false);
-    };
+      ws.onerror = () => {
+        if (!disposed) setWsConnected(false);
+      };
 
-    ws.onmessage = (ev) => {
-      try {
-        const msg = JSON.parse(ev.data) as WsServerMessage;
-        switch (msg.type) {
-          case "ready":
-            setWsConnected(true);
-            break;
-          case "audio_chunk":
-            enqueueAudioChunk(msg.pcm24_b64);
-            break;
-          case "transcript":
-            upsertTranscript(msg.speaker, msg.text_ko, msg.final);
-            if (msg.speaker === "character") {
-              setMouthOpen(0.45);
-              setTimeout(() => setMouthOpen(0), 260);
-            }
-            break;
-          case "character_state":
-            setCharacterState(msg.emotion, msg.gesture);
-            break;
-          case "story_update":
-            applyStoryUpdate(msg);
-            break;
-          case "error":
-            console.warn("WS server error:", msg.code, msg.message);
-            break;
+      ws.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data) as WsServerMessage;
+          switch (msg.type) {
+            case "ready":
+              setWsConnected(true);
+              break;
+            case "audio_chunk":
+              enqueueAudioChunk(msg.pcm24_b64);
+              break;
+            case "transcript":
+              upsertTranscript(msg.speaker, msg.text_ko, msg.final);
+              if (msg.speaker === "character") {
+                setMouthOpen(0.45);
+                setTimeout(() => setMouthOpen(0), 260);
+              }
+              break;
+            case "character_state":
+              setCharacterState(msg.emotion, msg.gesture);
+              break;
+            case "story_update":
+              applyStoryUpdate(msg);
+              break;
+            case "error":
+              console.warn("WS server error:", msg.code, msg.message);
+              break;
+          }
+        } catch (err) {
+          console.warn("Failed to parse WS message:", err);
         }
-      } catch (err) {
-        console.warn("Failed to parse WS message:", err);
-      }
+      };
     };
+
+    connectWs();
 
     return () => {
-      ws.close();
-      wsRef.current = null;
+      disposed = true;
+      if (reconnectTimer) window.clearTimeout(reconnectTimer);
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
       setWsConnected(false);
     };
   }, [

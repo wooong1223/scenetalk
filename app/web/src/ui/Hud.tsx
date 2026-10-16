@@ -133,8 +133,7 @@ export function Hud({
         flexDirection: "column",
         justifyContent: "space-between",
         padding: "18px 22px",
-        fontFamily:
-          "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        fontFamily: "var(--sans)",
         color: "#f8fafc",
         zIndex: 10,
       }}
@@ -251,7 +250,7 @@ export function Hud({
               cursor: "pointer",
             }}
           >
-            ← 씬 런처
+            ← 홈
           </button>
 
           <button
@@ -271,7 +270,7 @@ export function Hud({
               cursor: "pointer",
             }}
           >
-            {pointerLockEnabled ? "🖱️ 마우스 시선 고정 ON" : "🖱️ 1인칭 시점 회전"}
+            {pointerLockEnabled ? "🖱️ 시선 고정 ON" : "🖱️ 드래그로 둘러보기"}
           </button>
 
           <button
@@ -478,7 +477,7 @@ export function Hud({
                 marginBottom: "8px",
               }}
             >
-              🔍 3D 공간 소품 상호작용 (시선 0.6초 응시 또는 클릭)
+              🔍 장면 속 단서 (0.6초 응시 또는 클릭)
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
               {world?.props.map((prop) => {
@@ -851,25 +850,20 @@ export function Hud({
           style={{
             width: "100%",
             maxWidth: "820px",
-            background: "rgba(15, 23, 42, 0.88)",
-            backdropFilter: "blur(14px)",
-            border: "1px solid rgba(148, 163, 184, 0.3)",
-            borderRadius: "16px",
-            padding: "14px 20px",
-            boxShadow: "0 12px 32px rgba(0,0,0,0.5)",
+            textAlign: "center",
+            padding: "6px 20px",
           }}
         >
           <div
+            className="st-subtitle-line"
             style={{
-              fontSize: "15px",
-              fontWeight: 700,
-              color: "#f8fafc",
-              lineHeight: 1.5,
-              minHeight: "24px",
+              fontSize: "22px",
+              lineHeight: 1.45,
+              minHeight: "30px",
             }}
           >
-            <span style={{ color: "#60a5fa", marginRight: "8px" }}>
-              [{character?.display_name_ko ?? "상대역"}]
+            <span style={{ color: "#f2c94c", marginRight: "10px", fontSize: "15px" }}>
+              {character?.display_name_ko ?? "상대역"}
             </span>
             {latestCharacterLine}
           </div>
@@ -878,13 +872,12 @@ export function Hud({
             <div
               style={{
                 marginTop: "6px",
-                fontSize: "13px",
-                color: "#94a3b8",
-                borderTop: "1px solid rgba(148, 163, 184, 0.15)",
-                paddingTop: "6px",
+                fontSize: "15px",
+                color: "#e7e0d4",
+                textShadow: "0 1px 2px #000, 0 2px 8px rgba(0,0,0,0.9)",
               }}
             >
-              <strong style={{ color: "#34d399" }}>[나]</strong>{" "}
+              <strong style={{ color: "#9fe0b4" }}>나</strong>{" "}
               {latestUserLine}
             </div>
           )}

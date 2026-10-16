@@ -53,8 +53,7 @@ export function FirstPersonLook({ pointerLockEnabled }: FirstPersonLookProps) {
       } else {
         return;
       }
-      yawRef.current = Math.max(-1.25, Math.min(1.25, yawRef.current));
-      pitchRef.current = Math.max(-0.65, Math.min(0.65, pitchRef.current));
+      pitchRef.current = Math.max(-0.55, Math.min(0.5, pitchRef.current));
     };
 
     const onKeyDown = (e: KeyboardEvent) => {

@@ -112,6 +112,22 @@ async def _run_checks() -> None:
             f"character={sess['character']['display_name_ko']}"
         )
 
+        # 4b. Lesson (Gemini 4 Argon, thinking_level=low) + scene media (nano-banana)
+        r = await c.get(f"/api/lessons/{vid}")
+        assert r.status_code == 200, r.text
+        lesson = r.json()
+        assert len(lesson["vocab"]) >= 3 and len(lesson["quiz"]) >= 3
+        print(f"[4b] lesson ok: {lesson['title_ko']} vocab={len(lesson['vocab'])} quiz={len(lesson['quiz'])}")
+        for _ in range(10):
+            await asyncio.sleep(1.0)
+            media = (await c.get(f"/api/sessions/{sid}")).json()["media"]
+            if media["panorama_url"]:
+                break
+        assert media["panorama_url"], f"scene media never produced a panorama: {media}"
+        r = await c.get(media["panorama_url"])
+        assert r.status_code == 200 and len(r.content) > 10_000
+        print(f"[4c] scene media ok: status={media['status']} panorama={media['panorama_url']}")
+
         # 5. Live WebSocket handshake + opening turn + gaze + trigger_event
         got_ready = False
         got_audio_or_transcript = False

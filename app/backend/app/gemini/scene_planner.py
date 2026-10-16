@@ -27,6 +27,9 @@ Given the video scene context around timestamp {ts:.1f}s and the user's saved Ko
    Set `voice_name` to "Kore" (female/warm) or "Puck" (male/energetic) or "Charon" (male/deep).
 4. Set `initial_story.saved_expressions` to the exact list {exprs_json} and `initial_story.used_expressions` to [].
 5. Pre-plan 2 to 3 dramatic `candidate_events` (`sudden_rain`, `phone_rings`, `misunderstanding`, `confession_moment`, `stranger_enters`) that can twist the story mid-conversation.
+6. Write two ENGLISH image prompts for a photoreal image model:
+   - `world.backdrop_prompt_en`: 2-3 sentences describing the physical space as a 360° interior/exterior view (era, architecture, furniture, window view, time of day, light color). No people, no text.
+   - `character.appearance_prompt_en`: 1-2 sentences describing this FICTIONAL character's look (approximate age, gender, hairstyle, era-appropriate clothing, overall vibe). Never describe or name a real actor.
 
 Subtitle context around timestamp {ts:.1f}s:
 {subtitle_window}

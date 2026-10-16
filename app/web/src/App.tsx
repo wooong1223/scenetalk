@@ -6,10 +6,47 @@ import { SceneCanvas } from "./scene/SceneCanvas";
 import { useSceneStore } from "./state/sceneStore";
 import { Hud } from "./ui/Hud";
 import { LauncherPage } from "./ui/LauncherPage";
+import { LessonPage } from "./ui/LessonPage";
 import { ResultPage } from "./ui/ResultPage";
+
+function SceneLoadingOverlay({ label, sub }: { label: string; sub?: string }) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 5,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 18,
+        background:
+          "radial-gradient(ellipse at 50% 60%, #2a211a 0%, #120f0d 55%, #0c0a09 100%)",
+        color: "var(--paper)",
+        pointerEvents: "none",
+      }}
+    >
+      <div
+        className="st-serif"
+        style={{ fontSize: 30, fontWeight: 700, letterSpacing: "-0.01em" }}
+      >
+        {label}
+      </div>
+      {sub && <div style={{ color: "var(--smoke)", fontSize: 14 }}>{sub}</div>}
+      <div
+        className="st-shimmer"
+        style={{ width: 260, height: 4, borderRadius: 4, marginTop: 6 }}
+      />
+    </div>
+  );
+}
 
 function ScenePage({ sessionId }: { sessionId: string }) {
   const setSession = useSceneStore((s) => s.setSession);
+  const setMedia = useSceneStore((s) => s.setMedia);
+  const media = useSceneStore((s) => s.media);
+  const character = useSceneStore((s) => s.character);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pointerLockEnabled, setPointerLockEnabled] = useState(false);
@@ -33,6 +70,36 @@ function ScenePage({ sessionId }: { sessionId: string }) {
     };
   }, [sessionId, setSession]);
 
+  // Poll for Nano Banana media until ready/failed (max ~2 min)
+  const mediaStatus = media?.status ?? "pending";
+  useEffect(() => {
+    if (loading || error) return;
+    if (mediaStatus === "ready" || mediaStatus === "failed") return;
+    let cancelled = false;
+    let ticks = 0;
+    const timer = window.setInterval(async () => {
+      ticks += 1;
+      if (ticks > 40) {
+        window.clearInterval(timer);
+        return;
+      }
+      try {
+        const s = await getSession(sessionId);
+        if (cancelled) return;
+        if (s.media) setMedia(s.media);
+        if (s.media?.status === "ready" || s.media?.status === "failed") {
+          window.clearInterval(timer);
+        }
+      } catch {
+        // keep polling
+      }
+    }, 3000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [sessionId, loading, error, mediaStatus, setMedia]);
+
   const {
     startTalking,
     stopTalking,
@@ -43,25 +110,7 @@ function ScenePage({ sessionId }: { sessionId: string }) {
   } = useLiveVoice(loading || error ? null : sessionId);
 
   if (loading) {
-    return (
-      <div
-        style={{
-          height: "100vh",
-          background: "#090d16",
-          color: "#f8fafc",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "12px",
-          fontFamily: "'Pretendard', sans-serif",
-        }}
-      >
-        <div style={{ fontSize: "20px", fontWeight: 800 }}>
-          🎬 3D 씬 및 Gemini 3.8 Live 음성 세션 준비 중...
-        </div>
-      </div>
-    );
+    return <SceneLoadingOverlay label="장면을 여는 중" sub="세션을 불러오고 있어요" />;
   }
 
   if (error) {
@@ -69,17 +118,18 @@ function ScenePage({ sessionId }: { sessionId: string }) {
       <div
         style={{
           height: "100vh",
-          background: "#090d16",
-          color: "#f87171",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          color: "var(--bad)",
         }}
       >
         세션을 불러올 수 없습니다: {error}
       </div>
     );
   }
+
+  const waitingForPano = !media?.panorama_url && mediaStatus !== "failed";
 
   return (
     <div
@@ -88,7 +138,7 @@ function ScenePage({ sessionId }: { sessionId: string }) {
         width: "100vw",
         height: "100vh",
         overflow: "hidden",
-        background: "#090d16",
+        background: "#0c0a09",
       }}
     >
       <SceneCanvas
@@ -96,6 +146,16 @@ function ScenePage({ sessionId }: { sessionId: string }) {
         sendGaze={sendGaze}
         sendObjectSelected={sendObjectSelected}
       />
+      {waitingForPano && (
+        <SceneLoadingOverlay
+          label="Nano Banana가 장면을 그리는 중"
+          sub={
+            character
+              ? `${character.display_name_ko}이(가) 먼저 말을 걸어올 거예요. 음성은 이미 연결 중입니다.`
+              : "음성은 이미 연결 중입니다."
+          }
+        />
+      )}
       <Hud
         sessionId={sessionId}
         pointerLockEnabled={pointerLockEnabled}
@@ -121,6 +181,11 @@ export function App() {
   if (pathname.startsWith("/result/")) {
     const sessionId = decodeURIComponent(pathname.replace("/result/", "").split("/")[0]);
     return <ResultPage sessionId={sessionId} />;
+  }
+
+  if (pathname.startsWith("/learn/")) {
+    const videoId = decodeURIComponent(pathname.replace("/learn/", "").split("/")[0]);
+    return <LessonPage videoId={videoId} />;
   }
 
   return <LauncherPage />;

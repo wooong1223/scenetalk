@@ -133,6 +133,15 @@ async def run_live_bridge(ws: WebSocket, session: SessionRecord) -> None:
             config=live_cfg,
         ) as live:
             await _send_ws(ws, WsReadyOut(session_id=session.session_id))
+            if not session.transcript and session.character.opening_line_ko:
+                await _send_ws(
+                    ws,
+                    WsTranscriptOut(
+                        speaker="character",
+                        text_ko=session.character.opening_line_ko,
+                        final=False,
+                    ),
+                )
             await _send_director_text(
                 live,
                 f"[OPENING] 사용자가 방금 장면에 들어왔습니다. 첫 대사로 자연스럽게 말을 건네세요: {session.character.opening_line_ko}",
@@ -347,10 +356,30 @@ async def _pump_live_to_client(
             out_tr = getattr(sc, "output_transcription", None)
             if out_tr and getattr(out_tr, "text", None):
                 char_text_buf.append(out_tr.text)
+                partial_char = "".join(char_text_buf).strip()
+                if partial_char:
+                    await _send_ws(
+                        ws,
+                        WsTranscriptOut(
+                            speaker="character",
+                            text_ko=partial_char,
+                            final=False,
+                        ),
+                    )
 
             in_tr = getattr(sc, "input_transcription", None)
             if in_tr and getattr(in_tr, "text", None):
                 user_text_buf.append(in_tr.text)
+                partial_user = "".join(user_text_buf).strip()
+                if partial_user:
+                    await _send_ws(
+                        ws,
+                        WsTranscriptOut(
+                            speaker="user",
+                            text_ko=partial_user,
+                            final=False,
+                        ),
+                    )
 
             if getattr(sc, "turn_complete", False):
                 # Flush spoken user transcript if captured from microphone audio
